@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🎤 Quizmaster</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0f0e0b; --bg2: #1a1916; --bg3: #242220;
+    --gold: #f5c842; --gold2: #e6a800;
+    --cream: #f0ead8; --muted: #888070;
+    --border: rgba(245,200,66,0.15); --border2: rgba(245,200,66,0.3);
+    --green: #4caf82; --red: #e05a5a; --blue: #5b9cf6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--cream); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+  .container { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
+
+  /* SETUP SCREEN */
+  #setup-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 1.5rem; }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 64px; color: var(--cream); letter-spacing: 0.04em; }
+  .logo span { color: var(--gold); }
+  .setup-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 2rem; width: 100%; max-width: 480px; }
+  .setup-card h2 { font-size: 16px; font-weight: 500; margin-bottom: 1rem; color: var(--gold); }
+  .input-group { margin-bottom: 1rem; }
+  .input-group label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .input-group input { width: 100%; background: var(--bg3); border: 1px solid var(--border2); border-radius: 9px; padding: 10px 14px; color: var(--cream); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; }
+  .input-group input:focus { border-color: var(--gold); }
+  .input-group input::placeholder { color: var(--muted); }
+  .btn { width: 100%; padding: 12px; font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif; border-radius: 9px; border: none; cursor: pointer; transition: all 0.15s; }
+  .btn-gold { background: var(--gold); color: #0f0e0b; }
+  .btn-gold:hover { background: var(--gold2); }
+  .btn-outline { background: transparent; border: 1px solid var(--border2); color: var(--cream); }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+  .hint { font-size: 12px; color: var(--muted); text-align: center; line-height: 1.6; }
+  .hint code { background: var(--bg3); padding: 2px 6px; border-radius: 4px; font-size: 11px; color: var(--gold); }
+
+  /* MAIN APP */
+  #app { display: none; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 0 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px; }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .topbar h1 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.05em; }
+  .topbar h1 span { color: var(--gold); }
+  .room-badge { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 4px 12px; font-size: 12px; color: var(--muted); }
+  .room-badge b { color: var(--gold); font-size: 14px; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 6px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .grid { display: grid; grid-template-columns: 1fr 320px; gap: 1.5rem; }
+  @media(max-width:700px){ .grid { grid-template-columns: 1fr; } }
+
+  /* QUESTION PANEL */
+  .panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .panel-head { background: var(--bg3); padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .panel-title { font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .panel-body { padding: 18px; }
+
+  .round-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .rtab { padding: 4px 10px; font-size: 11px; border-radius: 99px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .rtab.active { background: var(--gold); color: #0f0e0b; border-color: var(--gold); font-weight: 600; }
+
+  .q-list { display: flex; flex-direction: column; gap: 8px; }
+  .q-row { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg3); cursor: pointer; transition: all 0.15s; }
+  .q-row:hover { border-color: var(--border2); }
+  .q-row.active { border-color: var(--gold); background: rgba(245,200,66,0.07); }
+  .q-row.done { opacity: 0.5; }
+  .q-num { font-size: 11px; color: var(--muted); min-width: 24px; margin-top: 2px; }
+  .q-text { font-size: 13px; line-height: 1.5; flex: 1; }
+  .q-check { color: var(--green); font-size: 14px; }
+
+  .active-q-box { background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px; padding: 16px; margin-bottom: 1rem; }
+  .active-q-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+  .active-q-text { font-size: 16px; line-height: 1.55; font-weight: 500; }
+  .active-q-answer { margin-top: 10px; padding: 10px 12px; background: rgba(76,175,130,0.1); border: 1px solid rgba(76,175,130,0.25); border-radius: 8px; font-size: 13px; color: var(--green); display: none; }
+  .active-q-answer.show { display: block; }
+
+  .btn-row { display: flex; gap: 8px; margin-bottom: 1rem; }
+  .btn-sm { padding: 8px 14px; font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; border-radius: 8px; cursor: pointer; transition: all 0.15s; border: 1px solid var(--border2); background: transparent; color: var(--cream); }
+  .btn-sm:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-sm.gold { background: var(--gold); color: #0f0e0b; border-color: var(--gold); }
+  .btn-sm.gold:hover { background: var(--gold2); }
+  .btn-sm.green { background: rgba(76,175,130,0.15); border-color: var(--green); color: var(--green); }
+
+  /* ANSWERS PANEL */
+  .answers-section { margin-top: 1rem; }
+  .answers-title { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .answer-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg3); margin-bottom: 6px; }
+  .answer-item .player-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .answer-item .answer-text { font-size: 13px; color: var(--muted); flex: 2; font-style: italic; }
+  .award-btn { padding: 4px 10px; font-size: 11px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.12s; }
+  .award-btn:hover { border-color: var(--green); color: var(--green); }
+  .award-btn.awarded { background: rgba(76,175,130,0.15); border-color: var(--green); color: var(--green); }
+  .no-answers { font-size: 13px; color: var(--muted); text-align: center; padding: 1rem; }
+
+  /* SCOREBOARD SIDE */
+  .score-list { display: flex; flex-direction: column; gap: 6px; }
+  .score-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg3); transition: all 0.3s; }
+  .score-item.top { border-color: rgba(245,200,66,0.4); }
+  .score-rank { font-size: 13px; color: var(--muted); width: 22px; text-align: center; }
+  .score-name { flex: 1; font-size: 14px; font-weight: 500; }
+  .score-pts { font-size: 18px; font-weight: 600; color: var(--gold); }
+  .score-bar { height: 3px; background: var(--bg); border-radius: 99px; margin-top: 4px; overflow: hidden; }
+  .score-bar-fill { height: 100%; background: var(--gold); border-radius: 99px; transition: width 0.5s ease; }
+
+  .players-section { margin-bottom: 1rem; }
+  .player-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--border); background: var(--bg3); font-size: 12px; margin: 3px; color: var(--cream); }
+  .player-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+  .waiting-chip .dot { background: var(--muted); }
+
+  .empty-state { text-align: center; padding: 2rem; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div id="setup-screen">
+  <div class="logo">Pub<span>Quiz</span> <span style="font-size:40px">🎤</span></div>
+  <div class="setup-card">
+    <h2>Firebase configuratie</h2>
+    <div class="input-group">
+      <label>API Key</label>
+      <input type="text" id="cfg-apikey" placeholder="AIzaSy..." />
+    </div>
+    <div class="input-group">
+      <label>Project ID</label>
+      <input type="text" id="cfg-projectid" placeholder="mijn-pubquiz-12345" />
+    </div>
+    <div class="input-group">
+      <label>Kamer naam (verzin iets kort)</label>
+      <input type="text" id="cfg-room" placeholder="bijv. kroeg2024" value="pubquiz" />
+    </div>
+    <button class="btn btn-gold" onclick="startApp()" style="margin-top:0.5rem;">Start als Quizmaster →</button>
+  </div>
+  <p class="hint">Zie de <code>SETUP.md</code> voor instructies hoe je Firebase aanmaakt (gratis, 5 min)</p>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="container">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>Pub<span>Quiz</span> 🎤</h1>
+        <div class="room-badge"><span class="status-dot"></span>Kamer: <b id="room-label"></b></div>
+      </div>
+      <div style="font-size:12px; color:var(--muted);" id="player-count">0 spelers online</div>
+    </div>
+
+    <!-- Players online -->
+    <div class="players-section panel" style="margin-bottom:1.5rem;">
+      <div class="panel-head"><span class="panel-title">Spelers online</span></div>
+      <div class="panel-body" style="padding:12px 18px;">
+        <div id="players-list"><span style="font-size:13px;color:var(--muted);">Wachten op spelers...</span></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: Questions -->
+      <div>
+        <div class="panel" style="margin-bottom:1.5rem;">
+          <div class="panel-head"><span class="panel-title">Actieve vraag</span></div>
+          <div class="panel-body">
+            <div class="active-q-box" id="active-q-box">
+              <div class="active-q-label">Geen vraag actief</div>
+              <div class="active-q-text" id="active-q-text" style="color:var(--muted);">Selecteer een vraag hieronder →</div>
+              <div class="active-q-answer" id="active-q-answer"></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn-sm" id="show-answer-btn" onclick="toggleAnswer()">Toon antwoord</button>
+              <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag ✓</button>
+            </div>
+            <div class="answers-section">
+              <div class="answers-title">Antwoorden van spelers</div>
+              <div id="answers-list"><div class="no-answers">Nog geen antwoorden</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title">Vragen</span></div>
+          <div class="panel-body">
+            <div class="round-tabs" id="round-tabs"></div>
+            <div class="q-list" id="q-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Scoreboard -->
+      <div>
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Scorebord</span>
+            <button class="btn-sm gold" onclick="broadcastScoreboard()" style="padding:4px 10px;font-size:11px;">📺 Toon aan iedereen</button>
+          </div>
+          <div class="panel-body">
+            <div class="score-list" id="score-list">
+              <div class="empty-state">Wachten op spelers...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, update, push, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const rounds = [
+  { title: "Algemene kennis", emoji: "🌍", questions: [
+    { q: "Welk land heeft de meeste tijdzones ter wereld?", a: "Frankrijk (12 tijdzones)" },
+    { q: "Wat is de internationale noodoproeporganisatie die het rode kruis-symbool gebruikt?", a: "Het Rode Kruis (ICRC)" },
+    { q: "In welk jaar werd de euro ingevoerd als chartaal geld?", a: "2002" },
+    { q: "Welke twee landen delen de langste landgrens ter wereld?", a: "Canada en de VS" },
+    { q: "Hoeveel ogen zitten er in totaal op twee standaard dobbelstenen?", a: "42" }
+  ]},
+  { title: "Muziek", emoji: "🎵", questions: [
+    { q: "Welke Nederlandse band scoorde een wereldhit met 'Radar Love'?", a: "Golden Earring" },
+    { q: "Hoe heet het debuutalbum van Amy Winehouse?", a: "Frank (2003)" },
+    { q: "Welk instrument bespeelt Toots Thielemans waarmee hij wereldberoemd werd?", a: "Mondharmonica" },
+    { q: "In welke stad is platenlabel Motown Records opgericht?", a: "Detroit" },
+    { q: "Welk nummer van Stromae verwijst naar een vogel en gaat over een verdwijnende vader?", a: "Papaoutai" }
+  ]},
+  { title: "Natuur & Wetenschap", emoji: "🔬", questions: [
+    { q: "Welk orgaan in het menselijk lichaam maakt insuline aan?", a: "De alvleesklier (pancreas)" },
+    { q: "Hoeveel chromosomen heeft een gezonde menselijke lichaamscel?", a: "46 (23 paar)" },
+    { q: "Wat is de naam van het laagje rond de aarde dat ons beschermt tegen UV-straling?", a: "De ozonlaag" },
+    { q: "Welk metaal is vloeibaar bij kamertemperatuur?", a: "Kwik" },
+    { q: "Op hoeveel graden Celsius kookt water op zeeniveau?", a: "100°C" }
+  ]},
+  { title: "Film & TV", emoji: "🎬", questions: [
+    { q: "Welke acteur speelt Walter White in Breaking Bad?", a: "Bryan Cranston" },
+    { q: "In welk fictief Afrikaans land speelt Black Panther zich af?", a: "Wakanda" },
+    { q: "Hoeveel seizoenen telt de originele serie Game of Thrones?", a: "8 seizoenen" },
+    { q: "Welke regisseur maakte Pulp Fiction en Kill Bill?", a: "Quentin Tarantino" },
+    { q: "Welke Netflix-serie gaat over overvallers met maskers van Salvador Dalí?", a: "La Casa de Papel" }
+  ]},
+  { title: "Sport", emoji: "⚽", questions: [
+    { q: "Welke club won de eerste UEFA Champions League (seizoen 1992/93)?", a: "Marseille" },
+    { q: "Hoeveel spelers staan er per team op het veld tijdens een basketbalwedstrijd?", a: "5" },
+    { q: "In welk jaar won Oranje het EK voetbal?", a: "1988" },
+    { q: "Welke sport wordt gespeeld in Wimbledon?", a: "Tennis" },
+    { q: "Wat is de maximale score die je in bowlen kunt halen?", a: "300 punten" }
+  ]},
+  { title: "Eten & Drinken", emoji: "🍕", questions: [
+    { q: "Uit welke twee basisingrediënten bestaat hollandaise saus?", a: "Eidooiers en geklaard boter" },
+    { q: "Welk biertype uit België wordt vaak in een kelkvormig glas geserveerd?", a: "Trappist / Dubbel / Tripel" },
+    { q: "Hoe heet de Japanse drank gemaakt van gefermenteerde rijst?", a: "Sake" },
+    { q: "Welk Italiaans gerecht betekent letterlijk 'opgepikt' of 'opgepeurd'?", a: "Tiramisù" },
+    { q: "In welk land is de stroopwafel uitgevonden?", a: "Nederland (Gouda)" }
+  ]},
+  { title: "Aardrijkskunde", emoji: "🗺️", questions: [
+    { q: "Welke Europese hoofdstad ligt het verst naar het noorden?", a: "Reykjavik (IJsland)" },
+    { q: "Door hoeveel landen stroomt de rivier de Rijn?", a: "6 landen" },
+    { q: "Welke oceaan is de grootste ter wereld?", a: "De Grote Oceaan (Stille Oceaan)" },
+    { q: "Hoe heet de beroemde woestijn die zich uitstrekt over Noord-Afrika?", a: "De Sahara" },
+    { q: "In welk land liggen de Galapagoseilanden?", a: "Ecuador" }
+  ]},
+  { title: "Pot luck", emoji: "🎲", questions: [
+    { q: "Welk jaar werd Facebook opgericht door Mark Zuckerberg?", a: "2004" },
+    { q: "Hoe heet de uitvinder van de gloeilamp?", a: "Thomas Edison" },
+    { q: "Welke taal wordt het meest gesproken in Brazilië?", a: "Portugees" },
+    { q: "Hoeveel letters telt het Nederlandse alfabet?", a: "26" },
+    { q: "Welk spel wordt gespeeld met zwarte en witte stenen op een 8x8 bord?", a: "Dammen (of schaken)" }
+  ]}
+];
+
+let db, roomRef, ROOM;
+let currentRoundIdx = 0;
+let activeQKey = null;
+let showingAnswer = false;
+let doneQuestions = new Set();
+let players = {};
+let scores = {};
+let currentAnswers = {};
+let awardedAnswers = new Set();
+
+window.startApp = function() {
+  const apiKey = document.getElementById('cfg-apikey').value.trim();
+  const projectId = document.getElementById('cfg-projectid').value.trim();
+  ROOM = document.getElementById('cfg-room').value.trim() || 'pubquiz';
+
+  if (!apiKey || !projectId) { alert('Vul Firebase API key en Project ID in!'); return; }
+
+  const app = initializeApp({ apiKey, authDomain: `${projectId}.firebaseapp.com`, databaseURL: `https://${projectId}-default-rtdb.europe-west1.firebasedatabase.app`, projectId });
+  db = getDatabase(app);
+  roomRef = ref(db, `rooms/${ROOM}`);
+
+  // init room
+  set(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false });
+
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('room-label').textContent = ROOM;
+
+  listenPlayers();
+  listenAnswers();
+  renderRoundTabs();
+  renderQuestions();
+};
+
+function listenPlayers() {
+  onValue(ref(db, `rooms/${ROOM}/players`), snap => {
+    players = snap.val() || {};
+    scores = {};
+    Object.entries(players).forEach(([k, v]) => { scores[k] = v.score || 0; });
+    renderPlayers();
+    renderScoreboard();
+    document.getElementById('player-count').textContent = `${Object.keys(players).length} spelers online`;
+  });
+}
+
+function listenAnswers() {
+  onValue(ref(db, `rooms/${ROOM}/answers`), snap => {
+    currentAnswers = snap.val() || {};
+    renderAnswers();
+  });
+}
+
+function renderPlayers() {
+  const el = document.getElementById('players-list');
+  const keys = Object.keys(players);
+  if (!keys.length) { el.innerHTML = '<span style="font-size:13px;color:var(--muted);">Wachten op spelers...</span>'; return; }
+  el.innerHTML = keys.map(k =>
+    `<span class="player-chip"><span class="dot"></span>${players[k].name}</span>`
+  ).join('');
+}
+
+function renderRoundTabs() {
+  document.getElementById('round-tabs').innerHTML = rounds.map((r, i) =>
+    `<button class="rtab ${i === currentRoundIdx ? 'active' : ''}" onclick="selectRound(${i})">${r.emoji} ${i+1}</button>`
+  ).join('');
+}
+
+window.selectRound = function(i) {
+  currentRoundIdx = i;
+  renderRoundTabs();
+  renderQuestions();
+};
+
+function renderQuestions() {
+  const r = rounds[currentRoundIdx];
+  document.getElementById('q-list').innerHTML = r.questions.map((q, qi) => {
+    const key = `${currentRoundIdx}-${qi}`;
+    const isActive = activeQKey === key;
+    const isDone = doneQuestions.has(key);
+    return `<div class="q-row ${isActive ? 'active' : ''} ${isDone ? 'done' : ''}" onclick="selectQuestion(${currentRoundIdx}, ${qi})">
+      <span class="q-num">V${currentRoundIdx * 5 + qi + 1}</span>
+      <span class="q-text">${q.q}</span>
+      ${isDone ? '<span class="q-check">✓</span>' : ''}
+    </div>`;
+  }).join('');
+}
+
+window.selectQuestion = function(ri, qi) {
+  const key = `${ri}-${qi}`;
+  activeQKey = key;
+  showingAnswer = false;
+  awardedAnswers = new Set();
+
+  const q = rounds[ri].questions[qi];
+  document.getElementById('active-q-label') && (document.querySelector('.active-q-label').textContent = `Ronde ${ri+1} · Vraag ${ri*5+qi+1}`);
+  document.getElementById('active-q-text').textContent = q.q;
+  document.getElementById('active-q-answer').textContent = `✓ Antwoord: ${q.a}`;
+  document.getElementById('active-q-answer').classList.remove('show');
+  document.getElementById('show-answer-btn').textContent = 'Toon antwoord';
+
+  // clear old answers
+  remove(ref(db, `rooms/${ROOM}/answers`));
+
+  // broadcast active question
+  update(ref(db, `rooms/${ROOM}/state`), {
+    activeQuestion: { ri, qi, text: q.q },
+    showAnswer: false,
+    showScoreboard: false
+  });
+
+  renderQuestions();
+};
+
+window.toggleAnswer = function() {
+  showingAnswer = !showingAnswer;
+  document.getElementById('active-q-answer').classList.toggle('show', showingAnswer);
+  document.getElementById('show-answer-btn').textContent = showingAnswer ? 'Verberg antwoord' : 'Toon antwoord';
+  update(ref(db, `rooms/${ROOM}/state`), { showAnswer: showingAnswer });
+};
+
+window.markDoneAndNext = function() {
+  if (activeQKey) doneQuestions.add(activeQKey);
+  // find next question
+  const [ri, qi] = activeQKey ? activeQKey.split('-').map(Number) : [0, -1];
+  let nRi = ri, nQi = qi + 1;
+  if (nQi >= rounds[ri].questions.length) { nRi++; nQi = 0; }
+  if (nRi < rounds.length) {
+    currentRoundIdx = nRi;
+    renderRoundTabs();
+    selectQuestion(nRi, nQi);
+  }
+  renderQuestions();
+};
+
+function renderAnswers() {
+  const el = document.getElementById('answers-list');
+  const entries = Object.entries(currentAnswers);
+  if (!entries.length) { el.innerHTML = '<div class="no-answers">Nog geen antwoorden</div>'; return; }
+  el.innerHTML = entries.map(([playerId, data]) => {
+    const name = players[playerId]?.name || playerId;
+    const awarded = awardedAnswers.has(playerId);
+    return `<div class="answer-item">
+      <span class="player-name">${name}</span>
+      <span class="answer-text">"${data.answer}"</span>
+      <button class="award-btn ${awarded ? 'awarded' : ''}" onclick="awardPoint('${playerId}')">${awarded ? '✓ Punt' : '+ Punt'}</button>
+    </div>`;
+  }).join('');
+}
+
+window.awardPoint = function(playerId) {
+  if (awardedAnswers.has(playerId)) {
+    awardedAnswers.delete(playerId);
+    const cur = players[playerId]?.score || 0;
+    update(ref(db, `rooms/${ROOM}/players/${playerId}`), { score: Math.max(0, cur - 1) });
+  } else {
+    awardedAnswers.add(playerId);
+    const cur = players[playerId]?.score || 0;
+    update(ref(db, `rooms/${ROOM}/players/${playerId}`), { score: cur + 1 });
+  }
+  renderAnswers();
+};
+
+function renderScoreboard() {
+  const el = document.getElementById('score-list');
+  const entries = Object.entries(players).map(([k, v]) => ({ id: k, name: v.name, score: v.score || 0 }))
+    .sort((a, b) => b.score - a.score);
+  if (!entries.length) { el.innerHTML = '<div class="empty-state">Wachten op spelers...</div>'; return; }
+  const max = entries[0].score || 1;
+  el.innerHTML = entries.map((p, i) => `
+    <div class="score-item ${i === 0 ? 'top' : ''}">
+      <div class="score-rank">${i === 0 ? '🏆' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1}</div>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="score-name">${p.name}</span>
+          <span class="score-pts">${p.score}</span>
+        </div>
+        <div class="score-bar"><div class="score-bar-fill" style="width:${Math.round(p.score/max*100)}%"></div></div>
+      </div>
+    </div>`).join('');
+}
+
+window.broadcastScoreboard = function() {
+  update(ref(db, `rooms/${ROOM}/state`), { showScoreboard: true });
+  setTimeout(() => update(ref(db, `rooms/${ROOM}/state`), { showScoreboard: false }), 8000);
+};
+</script>
+</body>
+</html>
