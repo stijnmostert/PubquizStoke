@@ -138,6 +138,14 @@
 
   .empty-state { text-align: center; padding: 2rem; color: var(--muted); font-size: 13px; }
 
+  /* Schuifknop (toggle) */
+  .toggle { position: relative; display: inline-block; width: 42px; height: 24px; cursor: pointer; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; inset: 0; background: var(--bg3); border: 1px solid var(--border2); border-radius: 99px; transition: all 0.2s; }
+  .toggle-slider::before { content: ''; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px; background: var(--muted); border-radius: 50%; transition: all 0.2s; }
+  .toggle input:checked + .toggle-slider { background: var(--gold); border-color: var(--gold); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(18px); background: #fff; }
+
   /* Wegswipe-waarschuwingen */
   #away-warnings { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1.5rem; }
   .away-card { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 12px; background: rgba(224,122,122,0.15); border: 1px solid var(--red); animation: shake 0.5s ease; }
@@ -198,6 +206,10 @@
       </div>
       <div style="display:flex; align-items:center; gap:12px;">
         <span style="font-size:12px; color:var(--muted);" id="player-count">0 spelers online</span>
+        <label class="toggle" title="Wegswipe-detectie aan/uit">
+          <input type="checkbox" id="away-toggle" onchange="renderAwayWarnings()" />
+          <span class="toggle-slider"></span>
+        </label>
         <button class="btn-sm" onclick="openRules()">📜 Regels</button>
         <button class="btn-sm" onclick="resetGame()" style="border-color:rgba(224,90,90,0.4); color:var(--red);">🔄 Reset spel</button>
       </div>
@@ -429,6 +441,9 @@ function listenPlayers() {
 function renderAwayWarnings() {
   const el = document.getElementById('away-warnings');
   if (!el) return;
+  const toggle = document.getElementById('away-toggle');
+  // detectie uit → niks tonen
+  if (!toggle || !toggle.checked) { el.innerHTML = ''; el.style.display = 'none'; return; }
   const away = Object.entries(players).filter(([k, v]) => v.away);
   if (!away.length) { el.innerHTML = ''; el.style.display = 'none'; return; }
   el.style.display = 'flex';
