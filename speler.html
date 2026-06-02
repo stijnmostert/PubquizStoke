@@ -47,6 +47,8 @@
   .submitted-box.show { display: block; }
   .submitted-text { font-size: 14px; color: var(--cream); font-weight: 500; }
   .submitted-answer { font-size: 13px; color: var(--muted); margin-top: 4px; font-style: italic; }
+  .feedback-result { font-size: 40px; margin-top: 12px; display: none; }
+  .feedback-result.show { display: block; }
 
   /* SCOREBOARD */
   #scoreboard-screen { display: none; text-align: center; }
@@ -61,6 +63,8 @@
   .room-info { font-size: 11px; color: var(--muted); text-align: center; margin-top: 1rem; }
   .room-info b { color: var(--cream); }
   .hint { font-size: 11px; color: var(--muted); text-align: center; line-height: 1.5; margin-top: 1.5rem; }
+  .agree-box { display: flex; align-items: center; gap: 12px; justify-content: center; margin-top: 1.5rem; padding: 16px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 12px; cursor: pointer; font-size: 15px; color: var(--cream); }
+  .agree-box input { width: 22px; height: 22px; cursor: pointer; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -94,6 +98,17 @@
     <div class="waiting-sub">Even bijkomen! De quiz gaat zo verder</div>
   </div>
 
+  <!-- AKKOORD MET REGELS -->
+  <div id="agree-screen" style="display:none;">
+    <div class="waiting-icon">📜</div>
+    <div class="waiting-title">Spelregels</div>
+    <div class="waiting-sub">De quizmaster legt de regels uit. Vink hieronder aan dat je akkoord gaat om door te gaan.</div>
+    <label class="agree-box" id="agree-label">
+      <input type="checkbox" id="agree-check" onchange="confirmAgree()" />
+      <span>Ik ga akkoord met de spelregels</span>
+    </label>
+  </div>
+
   <!-- QUESTION -->
   <div id="question-screen">
     <div class="q-label" id="q-label">Vraag 1</div>
@@ -103,6 +118,7 @@
     <div class="submitted-box" id="submitted-box">
       <div class="submitted-text">Antwoord ingediend!</div>
       <div class="submitted-answer" id="submitted-answer-text"></div>
+      <div class="feedback-result" id="feedback-result"></div>
     </div>
   </div>
 
@@ -133,6 +149,7 @@ const FIREBASE_CONFIG = {
 let db, ROOM, playerId, playerName;
 let currentQKey = null;
 let hasSubmitted = false;
+let hasAgreed = false;
 
 const app = initializeApp(FIREBASE_CONFIG);
 db = getDatabase(app);
@@ -153,12 +170,38 @@ window.joinQuiz = function() {
   document.getElementById('room-show').textContent = ROOM;
 
   listenState();
+  listenFeedback();
 };
+
+function listenFeedback() {
+  onValue(ref(db, `rooms/${ROOM}/feedback/${playerId}`), snap => {
+    const result = snap.val();
+    const el = document.getElementById('feedback-result');
+    if (!el) return;
+    if (result === 'correct') {
+      el.textContent = '✅';
+      el.classList.add('show');
+    } else if (result === 'wrong') {
+      el.textContent = '❌';
+      el.classList.add('show');
+    } else {
+      el.textContent = '';
+      el.classList.remove('show');
+    }
+  });
+}
 
 function listenState() {
   onValue(ref(db, `rooms/${ROOM}/state`), snap => {
     const state = snap.val();
     if (!state) return;
+
+    // akkoord met regels heeft voorrang
+    if (state.requireAgreement) {
+      if (!hasAgreed) { showAgree(); return; }
+    } else {
+      hasAgreed = false; // klaar voor een volgend verzoek
+    }
 
     if (state.showScoreboard) {
       showScoreboard();
@@ -184,6 +227,21 @@ function listenState() {
     }
   });
 }
+
+function showAgree() {
+  document.getElementById('waiting-screen').style.display = 'none';
+  document.getElementById('question-screen').style.display = 'none';
+  document.getElementById('scoreboard-screen').style.display = 'none';
+  document.getElementById('pause-screen').style.display = 'none';
+  document.getElementById('agree-screen').style.display = 'block';
+}
+
+window.confirmAgree = function() {
+  if (!document.getElementById('agree-check').checked) return;
+  hasAgreed = true;
+  set(ref(db, `rooms/${ROOM}/agreements/${playerId}`), { name: playerName, at: Date.now() });
+  document.getElementById('agree-screen').style.display = 'none';
+};
 
 function showWaiting() {
   document.getElementById('waiting-screen').style.display = 'block';
@@ -211,6 +269,8 @@ function showQuestion(q) {
   document.getElementById('submit-btn').style.display = 'block';
   document.getElementById('submit-btn').disabled = false;
   document.getElementById('submitted-box').classList.remove('show');
+  document.getElementById('feedback-result').classList.remove('show');
+  document.getElementById('feedback-result').textContent = '';
 }
 
 function showScoreboard() {
