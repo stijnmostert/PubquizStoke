@@ -222,7 +222,7 @@
       <div class="panel-head"><span class="panel-title" id="active-q-roundlabel">&nbsp;</span></div>
       <div class="panel-body">
         <div class="active-q-box big" id="active-q-box">
-          <div class="active-q-text" id="active-q-text">Zijn jullie er klaar voor maatjes?!?!</div>
+          <div class="active-q-text" id="active-q-text">Zijn jullie er een beetje klaar voor of moeten we nog even wachten?!?! 😄</div>
           <div class="active-q-answer" id="active-q-answer"></div>
         </div>
         <div class="btn-row">
@@ -581,20 +581,17 @@ window.markDoneAndNext = function() {
   // find next question
   const [ri, qi] = activeQKey ? activeQKey.split('-').map(Number) : [0, -1];
 
-  // laatste vraag van de ronde vlak vóór de pauze → naar pauzescherm
-  if (ri === mid - 1 && qi + 1 >= rounds[ri].questions.length) {
-    showPause();
+  // einde van de ronde?
+  if (qi + 1 >= rounds[ri].questions.length) {
+    // ronde vlak vóór de pauze → eerst pauzescherm
+    if (ri === mid - 1) { showPause(); return; }
+    // anders: naar de volgende ronde, maar eerst de opwarm-zin tonen
+    if (ri + 1 < rounds.length) { selectRound(ri + 1); }
     return;
   }
 
-  let nRi = ri, nQi = qi + 1;
-  if (nQi >= rounds[ri].questions.length) { nRi++; nQi = 0; }
-  if (nRi < rounds.length) {
-    currentRoundIdx = nRi;
-    renderRoundTabs();
-    selectQuestion(nRi, nQi);
-  }
-  renderQuestions();
+  // gewoon de volgende vraag binnen dezelfde ronde
+  selectQuestion(ri, qi + 1);
 };
 
 window.goPrev = function() {
@@ -742,7 +739,7 @@ window.resetGame = function() {
 
   // werk de schermen bij
   document.getElementById('active-q-roundlabel').innerHTML = '&nbsp;';
-  document.getElementById('active-q-text').textContent = 'Zijn jullie er klaar voor maatjes?!?!';
+  document.getElementById('active-q-text').textContent = readyMessages[0];
   document.getElementById('active-q-text').style.color = 'var(--cream)';
   document.getElementById('active-q-answer').classList.remove('show');
   document.getElementById('show-answer-btn').textContent = 'Toon antwoord';
