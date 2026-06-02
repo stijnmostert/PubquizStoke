@@ -52,12 +52,12 @@
   .grid > .panel > .panel-body { flex: 1; }
   @media(max-width:700px){ .grid { grid-template-columns: 1fr; } }
 
-  /* Hoofdlayout: midden + scorebord rechts */
-  .main-layout { display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; align-items: stretch; }
-  .center-col { display: flex; flex-direction: column; gap: 1.5rem; }
-  .score-panel { display: flex; flex-direction: column; }
-  .score-panel > .panel-body { flex: 1; overflow-y: auto; }
-  @media(max-width:800px){ .main-layout { grid-template-columns: 1fr; } }
+  /* Hoofdlayout: vraag | antwoorden | scorebord naast elkaar */
+  .main-layout { display: grid; grid-template-columns: 1fr 1fr 280px; gap: 1.5rem; align-items: stretch; }
+  .main-layout > .panel { display: flex; flex-direction: column; }
+  .main-layout > .panel > .panel-body { flex: 1; }
+  .score-panel > .panel-body { overflow-y: auto; }
+  @media(max-width:900px){ .main-layout { grid-template-columns: 1fr; } }
 
   /* QUESTION PANEL */
   .panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
@@ -157,7 +157,6 @@
     </label>
     <button class="btn btn-gold" onclick="startApp()" style="margin-top:0.5rem;">Start als Quizmaster →</button>
   </div>
-  <p class="hint">Zie de <code>SETUP.md</code> voor instructies hoe je Firebase aanmaakt (gratis, 5 min)</p>
 </div>
 
 <!-- MAIN APP -->
@@ -185,34 +184,33 @@
     <!-- Ronde categorieën -->
     <div class="round-tabs-bar" id="round-tabs"></div>
 
-    <!-- Hoofdlayout: midden (vraag + antwoorden gestapeld) | rechts (scorebord) -->
+    <!-- Hoofdlayout: vraag | antwoorden | scorebord naast elkaar -->
     <div class="main-layout">
-      <!-- Midden kolom -->
-      <div class="center-col">
-        <div class="panel">
-          <div class="panel-head"><span class="panel-title" id="active-q-roundlabel">&nbsp;</span></div>
-          <div class="panel-body">
-            <div class="active-q-box" id="active-q-box">
-              <div class="active-q-text" id="active-q-text" style="color:var(--muted);">Kies een ronde hierboven om te starten →</div>
-              <div class="active-q-answer" id="active-q-answer"></div>
-            </div>
-            <div class="btn-row">
-              <button class="btn-sm" id="prev-q-btn" onclick="goPrev()">← Vorige vraag</button>
-              <button class="btn-sm" id="show-answer-btn" onclick="toggleAnswer()">Toon antwoord</button>
-              <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag →</button>
-            </div>
+      <!-- Actieve vraag -->
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title" id="active-q-roundlabel">&nbsp;</span></div>
+        <div class="panel-body">
+          <div class="active-q-box" id="active-q-box">
+            <div class="active-q-text" id="active-q-text" style="color:var(--muted);">Kies een ronde hierboven om te starten →</div>
+            <div class="active-q-answer" id="active-q-answer"></div>
           </div>
-        </div>
-
-        <div class="panel">
-          <div class="panel-head"><span class="panel-title">Antwoorden van spelers</span></div>
-          <div class="panel-body">
-            <div id="answers-list"><div class="no-answers">Nog geen antwoorden</div></div>
+          <div class="btn-row">
+            <button class="btn-sm" id="prev-q-btn" onclick="goPrev()">← Vorige vraag</button>
+            <button class="btn-sm" id="show-answer-btn" onclick="toggleAnswer()">Toon antwoord</button>
+            <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag →</button>
           </div>
         </div>
       </div>
 
-      <!-- Rechter kolom: scorebord -->
+      <!-- Antwoorden -->
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Antwoorden van spelers</span></div>
+        <div class="panel-body">
+          <div id="answers-list"><div class="no-answers">Nog geen antwoorden</div></div>
+        </div>
+      </div>
+
+      <!-- Scorebord (lange kolom rechts) -->
       <div class="panel score-panel">
         <div class="panel-head">
           <span class="panel-title">Scorebord</span>
