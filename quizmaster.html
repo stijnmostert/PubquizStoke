@@ -358,7 +358,7 @@ window.startApp = function() {
   roomRef = ref(db, `rooms/${ROOM}`);
 
   // init room
-  set(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false });
+  set(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false, paused: false });
 
   document.getElementById('setup-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
@@ -438,7 +438,7 @@ window.selectRound = function(i) {
 
   // spelers terug naar wachtscherm en oude antwoorden wissen
   remove(ref(db, `rooms/${ROOM}/answers`));
-  update(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false });
+  update(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false, paused: false });
 };
 
 window.showPause = function() {
@@ -455,9 +455,9 @@ window.showPause = function() {
   document.getElementById('show-answer-btn').textContent = 'Toon antwoord';
   document.getElementById('answers-list').innerHTML = '<div class="no-answers">Nog geen antwoorden</div>';
 
-  // spelers terug naar wachtscherm
+  // spelers tonen het pauzescherm
   remove(ref(db, `rooms/${ROOM}/answers`));
-  update(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false });
+  update(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false, paused: true });
 };
 
 function renderQuestions() {
@@ -488,7 +488,8 @@ window.selectQuestion = function(ri, qi) {
   update(ref(db, `rooms/${ROOM}/state`), {
     activeQuestion: { ri, qi, text: q.q },
     showAnswer: false,
-    showScoreboard: false
+    showScoreboard: false,
+    paused: false
   });
 
   renderQuestions();
@@ -635,7 +636,7 @@ window.resetGame = function() {
   remove(ref(db, `rooms/${ROOM}/answers`));
 
   // reset de spelstatus terug naar het begin
-  set(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false });
+  set(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false, paused: false });
 
   // reset alles lokaal bij de quizmaster
   currentRoundIdx = 0;
