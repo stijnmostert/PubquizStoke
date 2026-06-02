@@ -115,6 +115,9 @@
   .award-btn { padding: 4px 10px; font-size: 11px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.12s; }
   .award-btn:hover { border-color: var(--green); color: var(--green); }
   .award-btn.awarded { background: rgba(76,175,130,0.15); border-color: var(--green); color: var(--green); }
+  .wrong-btn { padding: 4px 10px; font-size: 11px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.12s; }
+  .wrong-btn:hover { border-color: var(--red); color: var(--red); }
+  .wrong-btn.marked { background: rgba(224,122,122,0.15); border-color: var(--red); color: var(--red); }
   .no-answers { font-size: 13px; color: var(--muted); text-align: center; padding: 1rem; height: 100%; display: flex; align-items: center; justify-content: center; }
   #answers-list { height: 100%; }
 
@@ -147,6 +150,8 @@
   .rules-body p { font-size: 15px; line-height: 1.6; color: var(--cream); margin-bottom: 14px; }
   .rules-body p:last-child { margin-bottom: 0; }
   .rules-body strong { color: var(--gold); }
+  .rules-foot { padding: 14px 22px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); text-align: center; }
+  .rules-foot span { color: var(--cream); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -257,6 +262,7 @@
       <p><strong>Testregel 4 —</strong> Spieken op je telefoon mag natuurlijk niet 😉.</p>
       <p><strong>Testregel 5 —</strong> Het team met de meeste punten aan het eind wint.</p>
     </div>
+    <div class="rules-foot" id="rules-foot">✅ <span id="agree-count">0</span> van de <span id="agree-total">0</span> spelers akkoord</div>
   </div>
 </div>
 
@@ -334,6 +340,7 @@ let players = {};
 let scores = {};
 let currentAnswers = {};
 let awardedAnswers = new Set();
+let wrongAnswers = new Set();
 let revealedAnswers = new Set();
 
 window.startApp = function() {
@@ -366,6 +373,7 @@ window.startApp = function() {
 
   listenPlayers();
   listenAnswers();
+  listenAgreements();
   renderRoundTabs();
   renderQuestions();
 };
@@ -398,6 +406,18 @@ function listenAnswers() {
   onValue(ref(db, `rooms/${ROOM}/answers`), snap => {
     currentAnswers = snap.val() || {};
     renderAnswers();
+  });
+}
+
+function listenAgreements() {
+  onValue(ref(db, `rooms/${ROOM}/agreements`), snap => {
+    const agreements = snap.val() || {};
+    const count = Object.keys(agreements).length;
+    const total = Object.keys(players).length;
+    const cEl = document.getElementById('agree-count');
+    const tEl = document.getElementById('agree-total');
+    if (cEl) cEl.textContent = count;
+    if (tEl) tEl.textContent = total;
   });
 }
 
@@ -471,6 +491,7 @@ window.selectQuestion = function(ri, qi) {
   onPause = false;
   showingAnswer = false;
   awardedAnswers = new Set();
+  wrongAnswers = new Set();
   revealedAnswers = new Set();
 
   const q = rounds[ri].questions[qi];
@@ -481,8 +502,9 @@ window.selectQuestion = function(ri, qi) {
   document.getElementById('active-q-answer').classList.remove('show');
   document.getElementById('show-answer-btn').textContent = 'Toon antwoord';
 
-  // clear old answers
+  // clear old answers en feedback
   remove(ref(db, `rooms/${ROOM}/answers`));
+  remove(ref(db, `rooms/${ROOM}/feedback`));
 
   // broadcast active question
   update(ref(db, `rooms/${ROOM}/state`), {
@@ -560,7 +582,8 @@ function renderAnswers() {
   if (!entries.length) { el.innerHTML = '<div class="no-answers">Nog geen antwoorden</div>'; return; }
   el.innerHTML = entries.map(([playerId, data]) => {
     const name = players[playerId]?.name || playerId;
-    const awarded = awardedAnswers.has(playerId);
+    const correct = awardedAnswers.has(playerId);
+    const wrong = wrongAnswers.has(playerId);
     const visible = revealedAnswers.has(playerId);
     const answerHtml = visible
       ? `<span class="answer-text">"${data.answer}"</span>`
@@ -569,7 +592,8 @@ function renderAnswers() {
       <span class="player-name">${name}</span>
       ${answerHtml}
       <button class="eye-btn" onclick="toggleAnswerVisible('${playerId}')" title="${visible ? 'Verberg' : 'Toon'} antwoord">${visible ? '🙈' : '👁️'}</button>
-      <button class="award-btn ${awarded ? 'awarded' : ''}" onclick="awardPoint('${playerId}')">${awarded ? '✓ Punt' : '+ Punt'}</button>
+      <button class="award-btn ${correct ? 'awarded' : ''}" onclick="markCorrect('${playerId}')">${correct ? '✓ Punt' : '+ Punt'}</button>
+      <button class="wrong-btn ${wrong ? 'marked' : ''}" onclick="markWrong('${playerId}')">${wrong ? '✗ Fout' : 'Fout'}</button>
     </div>`;
   }).join('');
 }
@@ -583,15 +607,38 @@ window.toggleAnswerVisible = function(playerId) {
   renderAnswers();
 };
 
-window.awardPoint = function(playerId) {
+window.markCorrect = function(playerId) {
   if (awardedAnswers.has(playerId)) {
+    // ongedaan maken: punt eraf, feedback weg
     awardedAnswers.delete(playerId);
     const cur = players[playerId]?.score || 0;
     update(ref(db, `rooms/${ROOM}/players/${playerId}`), { score: Math.max(0, cur - 1) });
+    set(ref(db, `rooms/${ROOM}/feedback/${playerId}`), null);
   } else {
+    // als hij eerst op fout stond, die status weghalen
+    wrongAnswers.delete(playerId);
     awardedAnswers.add(playerId);
     const cur = players[playerId]?.score || 0;
     update(ref(db, `rooms/${ROOM}/players/${playerId}`), { score: cur + 1 });
+    set(ref(db, `rooms/${ROOM}/feedback/${playerId}`), 'correct');
+  }
+  renderAnswers();
+};
+
+window.markWrong = function(playerId) {
+  if (wrongAnswers.has(playerId)) {
+    // ongedaan maken: feedback weg
+    wrongAnswers.delete(playerId);
+    set(ref(db, `rooms/${ROOM}/feedback/${playerId}`), null);
+  } else {
+    // als hij eerst een punt had, dat eraf halen
+    if (awardedAnswers.has(playerId)) {
+      awardedAnswers.delete(playerId);
+      const cur = players[playerId]?.score || 0;
+      update(ref(db, `rooms/${ROOM}/players/${playerId}`), { score: Math.max(0, cur - 1) });
+    }
+    wrongAnswers.add(playerId);
+    set(ref(db, `rooms/${ROOM}/feedback/${playerId}`), 'wrong');
   }
   renderAnswers();
 };
@@ -622,10 +669,18 @@ window.broadcastScoreboard = function() {
 
 window.openRules = function() {
   document.getElementById('rules-overlay').classList.add('show');
+  // vraag spelers om akkoord te gaan met de regels
+  if (db && ROOM) {
+    update(ref(db, `rooms/${ROOM}/state`), { requireAgreement: true });
+    set(ref(db, `rooms/${ROOM}/agreements`), null);
+  }
 };
 
 window.closeRules = function() {
   document.getElementById('rules-overlay').classList.remove('show');
+  if (db && ROOM) {
+    update(ref(db, `rooms/${ROOM}/state`), { requireAgreement: false });
+  }
 };
 
 window.resetGame = function() {
@@ -634,6 +689,7 @@ window.resetGame = function() {
   // verwijder alle spelers en antwoorden uit de database
   remove(ref(db, `rooms/${ROOM}/players`));
   remove(ref(db, `rooms/${ROOM}/answers`));
+  remove(ref(db, `rooms/${ROOM}/feedback`));
 
   // reset de spelstatus terug naar het begin
   set(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false, paused: false });
@@ -649,6 +705,7 @@ window.resetGame = function() {
   scores = {};
   currentAnswers = {};
   awardedAnswers = new Set();
+  wrongAnswers = new Set();
   revealedAnswers = new Set();
 
   // werk de schermen bij
