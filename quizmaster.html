@@ -47,7 +47,9 @@
   .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 6px; animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: stretch; }
+  .grid > .panel { display: flex; flex-direction: column; }
+  .grid > .panel > .panel-body { flex: 1; }
   @media(max-width:700px){ .grid { grid-template-columns: 1fr; } }
 
   /* QUESTION PANEL */
@@ -61,7 +63,7 @@
   .rtab.active { background: var(--gold); color: #0f0e0b; border-color: var(--gold); font-weight: 600; }
 
   /* Grote ronde-categorie balk bovenaan */
-  .round-tabs-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .round-tabs-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; justify-content: center; }
   .round-tabs-bar .rtab { width: 52px; height: 52px; padding: 0; font-size: 14px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
   .round-tabs-bar .rtab:hover { border-color: var(--border2); color: var(--cream); }
   .round-tabs-bar .rtab .rtab-emoji { font-size: 24px; }
@@ -100,7 +102,8 @@
   .award-btn { padding: 4px 10px; font-size: 11px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.12s; }
   .award-btn:hover { border-color: var(--green); color: var(--green); }
   .award-btn.awarded { background: rgba(76,175,130,0.15); border-color: var(--green); color: var(--green); }
-  .no-answers { font-size: 13px; color: var(--muted); text-align: center; padding: 1rem; }
+  .no-answers { font-size: 13px; color: var(--muted); text-align: center; padding: 1rem; height: 100%; display: flex; align-items: center; justify-content: center; }
+  #answers-list { height: 100%; }
 
   /* SCOREBOARD SIDE */
   .score-list { display: flex; flex-direction: column; gap: 6px; }
