@@ -149,7 +149,9 @@ const FIREBASE_CONFIG = {
 let db, ROOM, playerId, playerName;
 let currentQKey = null;
 let hasSubmitted = false;
-let hasAgreed = false;
+let joinTime = 0;
+let latestRulesAt = 0;
+let agreedRulesAt = 0;
 
 const app = initializeApp(FIREBASE_CONFIG);
 db = getDatabase(app);
@@ -160,6 +162,7 @@ window.joinQuiz = function() {
   if (!playerName) { alert('Vul je naam in!'); return; }
 
   playerId = 'player_' + Math.random().toString(36).substr(2, 8);
+  joinTime = Date.now();
 
   set(ref(db, `rooms/${ROOM}/players/${playerId}`), { name: playerName, score: 0, joinedAt: Date.now() });
 
@@ -196,11 +199,11 @@ function listenState() {
     const state = snap.val();
     if (!state) return;
 
-    // akkoord met regels heeft voorrang
-    if (state.requireAgreement) {
-      if (!hasAgreed) { showAgree(); return; }
-    } else {
-      hasAgreed = false; // klaar voor een volgend verzoek
+    // akkoord-verzoek: alleen tonen als het ná het inloggen is gestuurd en nog niet akkoord
+    latestRulesAt = state.rulesRequestedAt || 0;
+    if (latestRulesAt > joinTime && agreedRulesAt !== latestRulesAt) {
+      showAgree();
+      return;
     }
 
     if (state.showScoreboard) {
@@ -238,9 +241,12 @@ function showAgree() {
 
 window.confirmAgree = function() {
   if (!document.getElementById('agree-check').checked) return;
-  hasAgreed = true;
+  agreedRulesAt = latestRulesAt; // dit verzoek is afgehandeld
   set(ref(db, `rooms/${ROOM}/agreements/${playerId}`), { name: playerName, at: Date.now() });
+  document.getElementById('agree-check').checked = false;
   document.getElementById('agree-screen').style.display = 'none';
+  // terug naar het wachtscherm
+  showWaiting();
 };
 
 function showWaiting() {
