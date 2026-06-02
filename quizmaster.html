@@ -508,7 +508,7 @@ window.selectQuestion = function(ri, qi) {
 
   // broadcast active question
   update(ref(db, `rooms/${ROOM}/state`), {
-    activeQuestion: { ri, qi, text: q.q },
+    activeQuestion: { ri, qi, text: q.q, title: rounds[ri].title, total: rounds[ri].questions.length },
     showAnswer: false,
     showScoreboard: false,
     paused: false
