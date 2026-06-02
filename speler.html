@@ -43,10 +43,9 @@
   textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border2); border-radius: 9px; padding: 12px 14px; color: var(--cream); font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none; resize: none; height: 100px; margin-bottom: 1rem; }
   textarea:focus { border-color: var(--gold); }
   textarea::placeholder { color: var(--muted); }
-  .submitted-box { background: rgba(76,175,130,0.1); border: 1px solid rgba(76,175,130,0.3); border-radius: 10px; padding: 1rem; text-align: center; display: none; }
+  .submitted-box { background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px; padding: 1rem; text-align: center; display: none; }
   .submitted-box.show { display: block; }
-  .submitted-icon { font-size: 28px; margin-bottom: 6px; }
-  .submitted-text { font-size: 14px; color: var(--green); font-weight: 500; }
+  .submitted-text { font-size: 14px; color: var(--cream); font-weight: 500; }
   .submitted-answer { font-size: 13px; color: var(--muted); margin-top: 4px; font-style: italic; }
 
   /* SCOREBOARD */
@@ -88,14 +87,20 @@
     <div class="player-name-badge" id="name-badge"></div>
   </div>
 
+  <!-- PAUZE -->
+  <div id="pause-screen" style="display:none;">
+    <div class="waiting-icon">🍻</div>
+    <div class="waiting-title">PAUZE 🎉</div>
+    <div class="waiting-sub">Even bijkomen! De quiz gaat zo verder</div>
+  </div>
+
   <!-- QUESTION -->
   <div id="question-screen">
     <div class="q-label" id="q-label">Vraag 1</div>
     <div class="q-text" id="q-text"></div>
     <textarea id="answer-input" placeholder="Typ je antwoord hier..."></textarea>
-    <button class="btn btn-gold" id="submit-btn" onclick="submitAnswer()">Insturen ✓</button>
+    <button class="btn btn-gold" id="submit-btn" onclick="submitAnswer()">Insturen</button>
     <div class="submitted-box" id="submitted-box">
-      <div class="submitted-icon">✅</div>
       <div class="submitted-text">Antwoord ingediend!</div>
       <div class="submitted-answer" id="submitted-answer-text"></div>
     </div>
@@ -160,6 +165,12 @@ function listenState() {
       return;
     }
 
+    if (state.paused) {
+      currentQKey = null;
+      showPause();
+      return;
+    }
+
     if (state.activeQuestion) {
       const q = state.activeQuestion;
       const key = `${q.ri}-${q.qi}`;
@@ -178,11 +189,20 @@ function showWaiting() {
   document.getElementById('waiting-screen').style.display = 'block';
   document.getElementById('question-screen').style.display = 'none';
   document.getElementById('scoreboard-screen').style.display = 'none';
+  document.getElementById('pause-screen').style.display = 'none';
+}
+
+function showPause() {
+  document.getElementById('waiting-screen').style.display = 'none';
+  document.getElementById('question-screen').style.display = 'none';
+  document.getElementById('scoreboard-screen').style.display = 'none';
+  document.getElementById('pause-screen').style.display = 'block';
 }
 
 function showQuestion(q) {
   document.getElementById('waiting-screen').style.display = 'none';
   document.getElementById('scoreboard-screen').style.display = 'none';
+  document.getElementById('pause-screen').style.display = 'none';
   document.getElementById('question-screen').style.display = 'block';
   document.getElementById('q-label').textContent = `Ronde ${q.ri + 1} · Vraag ${q.ri * 5 + q.qi + 1}`;
   document.getElementById('q-text').textContent = q.text;
@@ -209,6 +229,7 @@ function showScoreboard() {
 
     document.getElementById('waiting-screen').style.display = 'none';
     document.getElementById('question-screen').style.display = 'none';
+    document.getElementById('pause-screen').style.display = 'none';
     document.getElementById('scoreboard-screen').style.display = 'block';
   }, { onlyOnce: true });
 }
