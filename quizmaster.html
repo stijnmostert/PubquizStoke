@@ -340,6 +340,18 @@ const rounds = [
   ]}
 ];
 
+// Eén opwarm-zin per ronde (zelfde volgorde als de rondes hierboven)
+const readyMessages = [
+  "Zijn jullie er een beetje klaar voor of moeten we nog even wachten?!?! 😄",   // Algemene kennis
+  "Hebben jullie er een beetje zin maatjess🫵",                                 // Muziek
+  "Zit de kennis er al in of komt die straks pas?!?! 😉",                        // Natuur & Wetenschap
+  "Gaan we voor de winst of gewoon voor de gezelligheid?!?! 🍻",                 // Film & TV
+  "Denken jullie dat jullie gaan winnen of wordt het spannend?!?! 👀",          // Sport
+  "Zijn jullie scherp genoeg of wordt het een lange avond?!?! 😏",              // Eten & Drinken
+  "Klaar om te laten zien wat jullie kunnen?!?! 💪",                            // Aardrijkskunde
+  "Hebben jullie je hersens al aangezet vanavond?!?! 🧠✨"                        // Pot luck
+];
+
 let db, roomRef, ROOM;
 let currentRoundIdx = 0;
 let activeQKey = null;
@@ -473,7 +485,7 @@ window.selectRound = function(i) {
 
   // toon eerst het 'klaar voor?' scherm i.p.v. meteen de vraag
   document.getElementById('active-q-roundlabel').textContent = `${rounds[i].emoji} ${rounds[i].title}`;
-  document.getElementById('active-q-text').textContent = 'Zijn jullie er klaar voor maatjes?!?!';
+  document.getElementById('active-q-text').textContent = readyMessages[i] || 'Zijn jullie er klaar voor maatjes?!?!';
   document.getElementById('active-q-text').style.color = 'var(--cream)';
   document.getElementById('active-q-answer').classList.remove('show');
   document.getElementById('show-answer-btn').textContent = 'Toon antwoord';
