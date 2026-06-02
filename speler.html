@@ -49,6 +49,7 @@
   .submitted-answer { font-size: 13px; color: var(--muted); margin-top: 4px; font-style: italic; }
   .feedback-result { font-size: 40px; margin-top: 12px; display: none; }
   .feedback-result.show { display: block; }
+  .feedback-rank { font-size: 14px; color: var(--cream); font-weight: 600; margin-top: 8px; }
 
   /* SCOREBOARD */
   #scoreboard-screen { display: none; text-align: center; }
@@ -119,6 +120,7 @@
       <div class="submitted-text">Antwoord ingediend!</div>
       <div class="submitted-answer" id="submitted-answer-text"></div>
       <div class="feedback-result" id="feedback-result"></div>
+      <div class="feedback-rank" id="feedback-rank"></div>
     </div>
   </div>
 
@@ -174,12 +176,39 @@ window.joinQuiz = function() {
 
   listenState();
   listenFeedback();
+  listenPlayersForRank();
 
   // detecteer wegswipen / ander tabblad / app naar achtergrond
   document.addEventListener('visibilitychange', reportPresence);
   window.addEventListener('blur', reportPresence);
   window.addEventListener('focus', reportPresence);
 };
+
+let allPlayers = {};
+
+function listenPlayersForRank() {
+  onValue(ref(db, `rooms/${ROOM}/players`), snap => {
+    allPlayers = snap.val() || {};
+  });
+}
+
+function getMyRank() {
+  const sorted = Object.entries(allPlayers)
+    .map(([k, v]) => ({ id: k, score: v.score || 0 }))
+    .sort((a, b) => b.score - a.score);
+  const idx = sorted.findIndex(p => p.id === playerId);
+  if (idx === -1) return null;
+  return { rank: idx + 1, total: sorted.length, score: sorted[idx].score };
+}
+
+function showMyRank() {
+  const el = document.getElementById('feedback-rank');
+  if (!el) return;
+  const r = getMyRank();
+  if (!r) { el.textContent = ''; return; }
+  const medal = r.rank === 1 ? '🏆' : r.rank === 2 ? '🥈' : r.rank === 3 ? '🥉' : '';
+  el.textContent = `${medal} Je staat nu ${r.rank}e van de ${r.total} · ${r.score} ${r.score === 1 ? 'punt' : 'punten'}`;
+}
 
 function reportPresence() {
   if (!db || !ROOM || !playerId) return;
@@ -191,16 +220,20 @@ function listenFeedback() {
   onValue(ref(db, `rooms/${ROOM}/feedback/${playerId}`), snap => {
     const result = snap.val();
     const el = document.getElementById('feedback-result');
+    const rankEl = document.getElementById('feedback-rank');
     if (!el) return;
     if (result === 'correct') {
       el.textContent = '✅';
       el.classList.add('show');
+      showMyRank();
     } else if (result === 'wrong') {
       el.textContent = '❌';
       el.classList.add('show');
+      showMyRank();
     } else {
       el.textContent = '';
       el.classList.remove('show');
+      if (rankEl) rankEl.textContent = '';
     }
   });
 }
@@ -287,6 +320,7 @@ function showQuestion(q) {
   document.getElementById('submitted-box').classList.remove('show');
   document.getElementById('feedback-result').classList.remove('show');
   document.getElementById('feedback-result').textContent = '';
+  document.getElementById('feedback-rank').textContent = '';
 }
 
 function showScoreboard() {
