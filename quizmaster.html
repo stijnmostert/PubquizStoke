@@ -60,6 +60,12 @@
   .rtab { padding: 4px 10px; font-size: 11px; border-radius: 99px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif; }
   .rtab.active { background: var(--gold); color: #0f0e0b; border-color: var(--gold); font-weight: 600; }
 
+  /* Grote ronde-categorie balk bovenaan */
+  .round-tabs-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .round-tabs-bar .rtab { padding: 10px 16px; font-size: 14px; border-radius: 12px; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
+  .round-tabs-bar .rtab:hover { border-color: var(--border2); color: var(--cream); }
+  .round-tabs-bar .rtab .rtab-emoji { font-size: 18px; }
+
   .q-list { display: flex; flex-direction: column; gap: 8px; }
   .q-row { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg3); cursor: pointer; transition: all 0.15s; }
   .q-row:hover { border-color: var(--border2); }
@@ -70,6 +76,9 @@
   .q-check { color: var(--green); font-size: 14px; }
 
   .active-q-box { background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px; padding: 16px; margin-bottom: 1rem; }
+  .active-q-box.big { padding: 32px; text-align: center; min-height: 140px; display: flex; flex-direction: column; justify-content: center; }
+  .active-q-box.big .active-q-text { font-size: 26px; line-height: 1.4; }
+  .active-q-box.big .active-q-answer { font-size: 16px; margin-top: 16px; text-align: center; justify-content: center; }
   .active-q-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
   .active-q-text { font-size: 16px; line-height: 1.55; font-weight: 500; }
   .active-q-answer { margin-top: 10px; padding: 10px 12px; background: rgba(76,175,130,0.1); border: 1px solid rgba(76,175,130,0.25); border-radius: 8px; font-size: 13px; color: var(--green); display: none; }
@@ -157,48 +166,42 @@
       </div>
     </div>
 
-    <div class="grid">
-      <!-- LEFT: Questions -->
-      <div>
-        <div class="panel" style="margin-bottom:1.5rem;">
-          <div class="panel-head"><span class="panel-title">Actieve vraag</span></div>
-          <div class="panel-body">
-            <div class="active-q-box" id="active-q-box">
-              <div class="active-q-label">Geen vraag actief</div>
-              <div class="active-q-text" id="active-q-text" style="color:var(--muted);">Selecteer een vraag hieronder →</div>
-              <div class="active-q-answer" id="active-q-answer"></div>
-            </div>
-            <div class="btn-row">
-              <button class="btn-sm" id="show-answer-btn" onclick="toggleAnswer()">Toon antwoord</button>
-              <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag ✓</button>
-            </div>
-            <div class="answers-section">
-              <div class="answers-title">Antwoorden van spelers</div>
-              <div id="answers-list"><div class="no-answers">Nog geen antwoorden</div></div>
-            </div>
-          </div>
-        </div>
+    <!-- Ronde categorieën -->
+    <div class="round-tabs-bar" id="round-tabs"></div>
 
-        <div class="panel">
-          <div class="panel-head"><span class="panel-title">Vragen</span></div>
-          <div class="panel-body">
-            <div class="round-tabs" id="round-tabs"></div>
-            <div class="q-list" id="q-list"></div>
-          </div>
+    <!-- Actieve vraag (volle breedte) -->
+    <div class="panel" style="margin-bottom:1.5rem;">
+      <div class="panel-head"><span class="panel-title">Actieve vraag</span></div>
+      <div class="panel-body">
+        <div class="active-q-box big" id="active-q-box">
+          <div class="active-q-label">Geen vraag actief</div>
+          <div class="active-q-text" id="active-q-text" style="color:var(--muted);">Kies een ronde hierboven om te starten →</div>
+          <div class="active-q-answer" id="active-q-answer"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-sm" id="show-answer-btn" onclick="toggleAnswer()">Toon antwoord</button>
+          <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Antwoorden + Scorebord naast elkaar -->
+    <div class="grid">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Antwoorden van spelers</span></div>
+        <div class="panel-body">
+          <div id="answers-list"><div class="no-answers">Nog geen antwoorden</div></div>
         </div>
       </div>
 
-      <!-- RIGHT: Scoreboard -->
-      <div>
-        <div class="panel">
-          <div class="panel-head">
-            <span class="panel-title">Scorebord</span>
-            <button class="btn-sm gold" onclick="broadcastScoreboard()" style="padding:4px 10px;font-size:11px;">📺 Toon aan iedereen</button>
-          </div>
-          <div class="panel-body">
-            <div class="score-list" id="score-list">
-              <div class="empty-state">Wachten op spelers...</div>
-            </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Scorebord</span>
+          <button class="btn-sm gold" onclick="broadcastScoreboard()" style="padding:4px 10px;font-size:11px;">📺 Toon aan iedereen</button>
+        </div>
+        <div class="panel-body">
+          <div class="score-list" id="score-list">
+            <div class="empty-state">Wachten op spelers...</div>
           </div>
         </div>
       </div>
@@ -332,28 +335,19 @@ function renderPlayers() {
 
 function renderRoundTabs() {
   document.getElementById('round-tabs').innerHTML = rounds.map((r, i) =>
-    `<button class="rtab ${i === currentRoundIdx ? 'active' : ''}" onclick="selectRound(${i})">${r.emoji} ${i+1}</button>`
+    `<button class="rtab ${i === currentRoundIdx ? 'active' : ''}" onclick="selectRound(${i})"><span class="rtab-emoji">${r.emoji}</span> ${r.title}</button>`
   ).join('');
 }
 
 window.selectRound = function(i) {
   currentRoundIdx = i;
   renderRoundTabs();
-  renderQuestions();
+  // start meteen bij de eerste vraag van deze ronde
+  selectQuestion(i, 0);
 };
 
 function renderQuestions() {
-  const r = rounds[currentRoundIdx];
-  document.getElementById('q-list').innerHTML = r.questions.map((q, qi) => {
-    const key = `${currentRoundIdx}-${qi}`;
-    const isActive = activeQKey === key;
-    const isDone = doneQuestions.has(key);
-    return `<div class="q-row ${isActive ? 'active' : ''} ${isDone ? 'done' : ''}" onclick="selectQuestion(${currentRoundIdx}, ${qi})">
-      <span class="q-num">V${currentRoundIdx * 5 + qi + 1}</span>
-      <span class="q-text">${q.q}</span>
-      ${isDone ? '<span class="q-check">✓</span>' : ''}
-    </div>`;
-  }).join('');
+  // niet meer gebruikt (vragenlijst is verwijderd), maar laten staan zodat oude aanroepen niet crashen
 }
 
 window.selectQuestion = function(ri, qi) {
