@@ -52,6 +52,13 @@
   .grid > .panel > .panel-body { flex: 1; }
   @media(max-width:700px){ .grid { grid-template-columns: 1fr; } }
 
+  /* Hoofdlayout: midden + scorebord rechts */
+  .main-layout { display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; align-items: stretch; }
+  .center-col { display: flex; flex-direction: column; gap: 1.5rem; }
+  .score-panel { display: flex; flex-direction: column; }
+  .score-panel > .panel-body { flex: 1; overflow-y: auto; }
+  @media(max-width:800px){ .main-layout { grid-template-columns: 1fr; } }
+
   /* QUESTION PANEL */
   .panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
   .panel-head { background: var(--bg3); padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
@@ -178,40 +185,43 @@
     <!-- Ronde categorieën -->
     <div class="round-tabs-bar" id="round-tabs"></div>
 
-    <!-- Actieve vraag + Antwoorden naast elkaar -->
-    <div class="grid" style="margin-bottom:1.5rem;">
-      <div class="panel">
-        <div class="panel-head"><span class="panel-title" id="active-q-roundlabel">&nbsp;</span></div>
-        <div class="panel-body">
-          <div class="active-q-box" id="active-q-box">
-            <div class="active-q-text" id="active-q-text" style="color:var(--muted);">Kies een ronde hierboven om te starten →</div>
-            <div class="active-q-answer" id="active-q-answer"></div>
+    <!-- Hoofdlayout: midden (vraag + antwoorden gestapeld) | rechts (scorebord) -->
+    <div class="main-layout">
+      <!-- Midden kolom -->
+      <div class="center-col">
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title" id="active-q-roundlabel">&nbsp;</span></div>
+          <div class="panel-body">
+            <div class="active-q-box" id="active-q-box">
+              <div class="active-q-text" id="active-q-text" style="color:var(--muted);">Kies een ronde hierboven om te starten →</div>
+              <div class="active-q-answer" id="active-q-answer"></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn-sm" id="prev-q-btn" onclick="goPrev()">← Vorige vraag</button>
+              <button class="btn-sm" id="show-answer-btn" onclick="toggleAnswer()">Toon antwoord</button>
+              <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag →</button>
+            </div>
           </div>
-          <div class="btn-row">
-            <button class="btn-sm" id="prev-q-btn" onclick="goPrev()">← Vorige vraag</button>
-            <button class="btn-sm" id="show-answer-btn" onclick="toggleAnswer()">Toon antwoord</button>
-            <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag →</button>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title">Antwoorden van spelers</span></div>
+          <div class="panel-body">
+            <div id="answers-list"><div class="no-answers">Nog geen antwoorden</div></div>
           </div>
         </div>
       </div>
 
-      <div class="panel">
-        <div class="panel-head"><span class="panel-title">Antwoorden van spelers</span></div>
-        <div class="panel-body">
-          <div id="answers-list"><div class="no-answers">Nog geen antwoorden</div></div>
+      <!-- Rechter kolom: scorebord -->
+      <div class="panel score-panel">
+        <div class="panel-head">
+          <span class="panel-title">Scorebord</span>
+          <button class="btn-sm gold" onclick="broadcastScoreboard()" style="padding:4px 10px;font-size:11px;">📺 Toon</button>
         </div>
-      </div>
-    </div>
-
-    <!-- Scorebord op volle breedte -->
-    <div class="panel">
-      <div class="panel-head">
-        <span class="panel-title">Scorebord</span>
-        <button class="btn-sm gold" onclick="broadcastScoreboard()" style="padding:4px 10px;font-size:11px;">📺 Toon aan iedereen</button>
-      </div>
-      <div class="panel-body">
-        <div class="score-list" id="score-list">
-          <div class="empty-state">Wachten op spelers...</div>
+        <div class="panel-body">
+          <div class="score-list" id="score-list">
+            <div class="empty-state">Wachten op spelers...</div>
+          </div>
         </div>
       </div>
     </div>
