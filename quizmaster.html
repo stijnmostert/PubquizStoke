@@ -669,18 +669,15 @@ window.broadcastScoreboard = function() {
 
 window.openRules = function() {
   document.getElementById('rules-overlay').classList.add('show');
-  // vraag spelers om akkoord te gaan met de regels
+  // vraag spelers om akkoord te gaan met de regels (met tijdstempel)
   if (db && ROOM) {
-    update(ref(db, `rooms/${ROOM}/state`), { requireAgreement: true });
+    update(ref(db, `rooms/${ROOM}/state`), { rulesRequestedAt: Date.now() });
     set(ref(db, `rooms/${ROOM}/agreements`), null);
   }
 };
 
 window.closeRules = function() {
   document.getElementById('rules-overlay').classList.remove('show');
-  if (db && ROOM) {
-    update(ref(db, `rooms/${ROOM}/state`), { requireAgreement: false });
-  }
 };
 
 window.resetGame = function() {
