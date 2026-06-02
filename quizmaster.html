@@ -133,6 +133,8 @@
 
   .players-section { margin-bottom: 1rem; }
   .player-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--border); background: var(--bg3); font-size: 12px; margin: 3px; color: var(--cream); }
+  .kick-btn { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 12px; padding: 0 2px; border-radius: 4px; line-height: 1; }
+  .kick-btn:hover { color: var(--red); }
   .player-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
   .waiting-chip .dot { background: var(--muted); }
 
@@ -476,9 +478,17 @@ function renderPlayers() {
   const keys = Object.keys(players);
   if (!keys.length) { el.innerHTML = '<span style="font-size:13px;color:var(--muted);">Wachten op spelers...</span>'; return; }
   el.innerHTML = keys.map(k =>
-    `<span class="player-chip"><span class="dot"></span>${players[k].name}</span>`
+    `<span class="player-chip"><span class="dot"></span>${players[k].name}<button class="kick-btn" onclick="kickPlayer('${k}', '${(players[k].name || '').replace(/'/g, "\\'")}')" title="Verwijder speler">✕</button></span>`
   ).join('');
 }
+
+window.kickPlayer = function(playerId, name) {
+  if (!confirm(`Speler "${name}" uit het spel verwijderen?`)) return;
+  // markeer als gekickt zodat de speler een bericht ziet
+  set(ref(db, `rooms/${ROOM}/players/${playerId}`), { name, kicked: true });
+  // na een paar seconden helemaal verwijderen
+  setTimeout(() => { remove(ref(db, `rooms/${ROOM}/players/${playerId}`)); }, 5000);
+};
 
 function renderRoundTabs() {
   const mid = Math.floor(rounds.length / 2);
