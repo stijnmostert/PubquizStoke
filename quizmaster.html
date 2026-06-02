@@ -52,8 +52,8 @@
   .grid > .panel > .panel-body { flex: 1; }
   @media(max-width:700px){ .grid { grid-template-columns: 1fr; } }
 
-  /* Hoofdlayout: vraag | antwoorden | scorebord naast elkaar */
-  .main-layout { display: grid; grid-template-columns: 1fr 1fr 280px; gap: 1.5rem; align-items: stretch; }
+  /* Hoofdlayout: antwoorden | scorebord naast elkaar */
+  .main-layout { display: grid; grid-template-columns: 1fr 280px; gap: 1.5rem; align-items: stretch; }
   .main-layout > .panel { display: flex; flex-direction: column; }
   .main-layout > .panel > .panel-body { flex: 1; }
   .score-panel > .panel-body { overflow-y: auto; }
@@ -185,24 +185,24 @@
     <!-- Ronde categorieën -->
     <div class="round-tabs-bar" id="round-tabs"></div>
 
-    <!-- Hoofdlayout: vraag | antwoorden | scorebord naast elkaar -->
-    <div class="main-layout">
-      <!-- Actieve vraag -->
-      <div class="panel">
-        <div class="panel-head"><span class="panel-title" id="active-q-roundlabel">&nbsp;</span></div>
-        <div class="panel-body">
-          <div class="active-q-box" id="active-q-box">
-            <div class="active-q-text" id="active-q-text" style="color:var(--muted);">Kies een ronde hierboven om te starten →</div>
-            <div class="active-q-answer" id="active-q-answer"></div>
-          </div>
-          <div class="btn-row">
-            <button class="btn-sm" id="prev-q-btn" onclick="goPrev()">Vorige vraag</button>
-            <button class="btn-sm" id="show-answer-btn" onclick="toggleAnswer()">Toon antwoord</button>
-            <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag</button>
-          </div>
+    <!-- Actieve vraag groot bovenaan -->
+    <div class="panel" style="margin-bottom:1.5rem;">
+      <div class="panel-head"><span class="panel-title" id="active-q-roundlabel">&nbsp;</span></div>
+      <div class="panel-body">
+        <div class="active-q-box big" id="active-q-box">
+          <div class="active-q-text" id="active-q-text" style="color:var(--muted);">Kies een ronde hierboven om te starten →</div>
+          <div class="active-q-answer" id="active-q-answer"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-sm" id="prev-q-btn" onclick="goPrev()">Vorige vraag</button>
+          <button class="btn-sm" id="show-answer-btn" onclick="toggleAnswer()">Toon antwoord</button>
+          <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag</button>
         </div>
       </div>
+    </div>
 
+    <!-- Antwoorden + scorebord naast elkaar -->
+    <div class="main-layout">
       <!-- Antwoorden -->
       <div class="panel">
         <div class="panel-head"><span class="panel-title">Antwoorden van spelers</span></div>
@@ -211,7 +211,7 @@
         </div>
       </div>
 
-      <!-- Scorebord (lange kolom rechts) -->
+      <!-- Scorebord -->
       <div class="panel score-panel">
         <div class="panel-head">
           <span class="panel-title">Scorebord</span>
