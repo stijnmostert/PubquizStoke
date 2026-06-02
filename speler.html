@@ -39,7 +39,7 @@
   /* QUESTION */
   #question-screen { display: none; }
   .q-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
-  .q-text { font-size: 18px; font-weight: 500; line-height: 1.5; margin-bottom: 1.5rem; }
+  .q-prompt { font-size: 15px; color: var(--muted); line-height: 1.5; margin-bottom: 1.5rem; }
   textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border2); border-radius: 9px; padding: 12px 14px; color: var(--cream); font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none; resize: none; height: 100px; margin-bottom: 1rem; }
   textarea:focus { border-color: var(--gold); }
   textarea::placeholder { color: var(--muted); }
@@ -112,7 +112,7 @@
   <!-- QUESTION -->
   <div id="question-screen">
     <div class="q-label" id="q-label">Vraag 1</div>
-    <div class="q-text" id="q-text"></div>
+    <div class="q-prompt">Typ hieronder je antwoord 👇</div>
     <textarea id="answer-input" placeholder="Typ je antwoord hier..."></textarea>
     <button class="btn btn-gold" id="submit-btn" onclick="submitAnswer()">Insturen</button>
     <div class="submitted-box" id="submitted-box">
@@ -268,8 +268,7 @@ function showQuestion(q) {
   document.getElementById('scoreboard-screen').style.display = 'none';
   document.getElementById('pause-screen').style.display = 'none';
   document.getElementById('question-screen').style.display = 'block';
-  document.getElementById('q-label').textContent = `Ronde ${q.ri + 1} · Vraag ${q.ri * 5 + q.qi + 1}`;
-  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('q-label').textContent = `Vraag ${q.qi + 1}/${q.total || 5} van de ${q.title || ''}`;
   document.getElementById('answer-input').value = '';
   document.getElementById('answer-input').disabled = false;
   document.getElementById('submit-btn').style.display = 'block';
