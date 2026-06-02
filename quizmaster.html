@@ -99,6 +99,9 @@
   .answer-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg3); margin-bottom: 6px; }
   .answer-item .player-name { font-size: 13px; font-weight: 500; flex: 1; }
   .answer-item .answer-text { font-size: 13px; color: var(--muted); flex: 2; font-style: italic; }
+  .answer-item .answer-text.hidden-answer { letter-spacing: 2px; opacity: 0.5; font-style: normal; }
+  .eye-btn { padding: 4px 8px; font-size: 14px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; cursor: pointer; transition: all 0.12s; line-height: 1; }
+  .eye-btn:hover { border-color: var(--gold); background: rgba(78,120,168,0.15); }
   .award-btn { padding: 4px 10px; font-size: 11px; border-radius: 6px; border: 1px solid var(--border2); background: transparent; color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.12s; }
   .award-btn:hover { border-color: var(--green); color: var(--green); }
   .award-btn.awarded { background: rgba(76,175,130,0.15); border-color: var(--green); color: var(--green); }
@@ -178,14 +181,14 @@
     <!-- Actieve vraag + Antwoorden naast elkaar -->
     <div class="grid" style="margin-bottom:1.5rem;">
       <div class="panel">
-        <div class="panel-head"><span class="panel-title">Actieve vraag</span></div>
+        <div class="panel-head"><span class="panel-title" id="active-q-roundlabel">&nbsp;</span></div>
         <div class="panel-body">
           <div class="active-q-box" id="active-q-box">
-            <div class="active-q-label">Geen vraag actief</div>
             <div class="active-q-text" id="active-q-text" style="color:var(--muted);">Kies een ronde hierboven om te starten →</div>
             <div class="active-q-answer" id="active-q-answer"></div>
           </div>
           <div class="btn-row">
+            <button class="btn-sm" id="prev-q-btn" onclick="goPrev()">← Vorige vraag</button>
             <button class="btn-sm" id="show-answer-btn" onclick="toggleAnswer()">Toon antwoord</button>
             <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag →</button>
           </div>
@@ -287,6 +290,7 @@ let players = {};
 let scores = {};
 let currentAnswers = {};
 let awardedAnswers = new Set();
+let revealedAnswers = new Set();
 
 window.startApp = function() {
   const apiKey = document.getElementById('cfg-apikey').value.trim();
@@ -384,10 +388,12 @@ window.selectQuestion = function(ri, qi) {
   activeQKey = key;
   showingAnswer = false;
   awardedAnswers = new Set();
+  revealedAnswers = new Set();
 
   const q = rounds[ri].questions[qi];
-  document.getElementById('active-q-label') && (document.querySelector('.active-q-label').textContent = `Ronde ${ri+1} · Vraag ${ri*5+qi+1}`);
+  document.getElementById('active-q-roundlabel').textContent = `Ronde ${ri+1} · Vraag ${ri*5+qi+1}`;
   document.getElementById('active-q-text').textContent = q.q;
+  document.getElementById('active-q-text').style.color = 'var(--cream)';
   document.getElementById('active-q-answer').textContent = `✓ Antwoord: ${q.a}`;
   document.getElementById('active-q-answer').classList.remove('show');
   document.getElementById('show-answer-btn').textContent = 'Toon antwoord';
@@ -426,6 +432,20 @@ window.markDoneAndNext = function() {
   renderQuestions();
 };
 
+window.goPrev = function() {
+  if (!activeQKey) return;
+  const [ri, qi] = activeQKey.split('-').map(Number);
+  let pRi = ri, pQi = qi - 1;
+  if (pQi < 0) {
+    pRi = ri - 1;
+    if (pRi < 0) return; // al bij de allereerste vraag
+    pQi = rounds[pRi].questions.length - 1;
+  }
+  currentRoundIdx = pRi;
+  renderRoundTabs();
+  selectQuestion(pRi, pQi);
+};
+
 function renderAnswers() {
   const el = document.getElementById('answers-list');
   const entries = Object.entries(currentAnswers);
@@ -433,13 +453,27 @@ function renderAnswers() {
   el.innerHTML = entries.map(([playerId, data]) => {
     const name = players[playerId]?.name || playerId;
     const awarded = awardedAnswers.has(playerId);
+    const visible = revealedAnswers.has(playerId);
+    const answerHtml = visible
+      ? `<span class="answer-text">"${data.answer}"</span>`
+      : `<span class="answer-text hidden-answer">••••••••</span>`;
     return `<div class="answer-item">
       <span class="player-name">${name}</span>
-      <span class="answer-text">"${data.answer}"</span>
+      ${answerHtml}
+      <button class="eye-btn" onclick="toggleAnswerVisible('${playerId}')" title="${visible ? 'Verberg' : 'Toon'} antwoord">${visible ? '🙈' : '👁️'}</button>
       <button class="award-btn ${awarded ? 'awarded' : ''}" onclick="awardPoint('${playerId}')">${awarded ? '✓ Punt' : '+ Punt'}</button>
     </div>`;
   }).join('');
 }
+
+window.toggleAnswerVisible = function(playerId) {
+  if (revealedAnswers.has(playerId)) {
+    revealedAnswers.delete(playerId);
+  } else {
+    revealedAnswers.add(playerId);
+  }
+  renderAnswers();
+};
 
 window.awardPoint = function(playerId) {
   if (awardedAnswers.has(playerId)) {
@@ -497,10 +531,11 @@ window.resetGame = function() {
   scores = {};
   currentAnswers = {};
   awardedAnswers = new Set();
+  revealedAnswers = new Set();
 
   // werk de schermen bij
-  document.querySelector('.active-q-label').textContent = 'Geen vraag actief';
-  document.getElementById('active-q-text').textContent = 'Selecteer een vraag hieronder →';
+  document.getElementById('active-q-roundlabel').innerHTML = '&nbsp;';
+  document.getElementById('active-q-text').textContent = 'Kies een ronde hierboven om te starten →';
   document.getElementById('active-q-text').style.color = 'var(--muted)';
   document.getElementById('active-q-answer').classList.remove('show');
   document.getElementById('show-answer-btn').textContent = 'Toon antwoord';
