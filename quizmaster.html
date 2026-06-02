@@ -327,6 +327,7 @@ let db, roomRef, ROOM;
 let currentRoundIdx = 0;
 let activeQKey = null;
 let pendingRound = null;
+let onPause = false;
 let showingAnswer = false;
 let doneQuestions = new Set();
 let players = {};
@@ -424,6 +425,7 @@ window.selectRound = function(i) {
   currentRoundIdx = i;
   pendingRound = i;
   activeQKey = null;
+  onPause = false;
   renderRoundTabs();
 
   // toon eerst het 'klaar voor?' scherm i.p.v. meteen de vraag
@@ -442,6 +444,7 @@ window.selectRound = function(i) {
 window.showPause = function() {
   pendingRound = null;
   activeQKey = null;
+  onPause = true;
   currentRoundIdx = -1;
   renderRoundTabs();
 
@@ -465,6 +468,7 @@ window.selectQuestion = function(ri, qi) {
   const key = `${ri}-${qi}`;
   activeQKey = key;
   pendingRound = null;
+  onPause = false;
   showingAnswer = false;
   awardedAnswers = new Set();
   revealedAnswers = new Set();
@@ -498,6 +502,15 @@ window.toggleAnswer = function() {
 };
 
 window.markDoneAndNext = function() {
+  const mid = Math.floor(rounds.length / 2);
+
+  // vanuit de pauze: ga naar de volgende ronde (icoon na de pauze)
+  if (onPause) {
+    onPause = false;
+    selectRound(mid);
+    return;
+  }
+
   // vanuit het 'klaar voor?' scherm: start de eerste vraag van de ronde
   if (!activeQKey && pendingRound !== null) {
     const r = pendingRound;
@@ -509,6 +522,13 @@ window.markDoneAndNext = function() {
   if (activeQKey) doneQuestions.add(activeQKey);
   // find next question
   const [ri, qi] = activeQKey ? activeQKey.split('-').map(Number) : [0, -1];
+
+  // laatste vraag van de ronde vlak vóór de pauze → naar pauzescherm
+  if (ri === mid - 1 && qi + 1 >= rounds[ri].questions.length) {
+    showPause();
+    return;
+  }
+
   let nRi = ri, nQi = qi + 1;
   if (nQi >= rounds[ri].questions.length) { nRi++; nQi = 0; }
   if (nRi < rounds.length) {
@@ -621,6 +641,7 @@ window.resetGame = function() {
   currentRoundIdx = 0;
   activeQKey = null;
   pendingRound = null;
+  onPause = false;
   showingAnswer = false;
   doneQuestions = new Set();
   players = {};
