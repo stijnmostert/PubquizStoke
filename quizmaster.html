@@ -132,6 +132,19 @@
   .waiting-chip .dot { background: var(--muted); }
 
   .empty-state { text-align: center; padding: 2rem; color: var(--muted); font-size: 13px; }
+
+  /* Regels pop-up */
+  #rules-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 1.5rem; }
+  #rules-overlay.show { display: flex; }
+  .rules-modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: 16px; width: 100%; max-width: 560px; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; }
+  .rules-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .rules-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.05em; color: var(--cream); }
+  .rules-close { background: transparent; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+  .rules-close:hover { color: var(--cream); background: var(--bg3); }
+  .rules-body { padding: 22px; overflow-y: auto; }
+  .rules-body p { font-size: 15px; line-height: 1.6; color: var(--cream); margin-bottom: 14px; }
+  .rules-body p:last-child { margin-bottom: 0; }
+  .rules-body strong { color: var(--gold); }
 </style>
 </head>
 <body>
@@ -170,6 +183,7 @@
       </div>
       <div style="display:flex; align-items:center; gap:12px;">
         <span style="font-size:12px; color:var(--muted);" id="player-count">0 spelers online</span>
+        <button class="btn-sm" onclick="openRules()">📜 Regels</button>
         <button class="btn-sm" onclick="resetGame()" style="border-color:rgba(224,90,90,0.4); color:var(--red);">🔄 Reset spel</button>
       </div>
     </div>
@@ -223,6 +237,23 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Regels pop-up -->
+<div id="rules-overlay" onclick="closeRules(event)">
+  <div class="rules-modal" onclick="event.stopPropagation()">
+    <div class="rules-head">
+      <span class="rules-title">📜 Spelregels</span>
+      <button class="rules-close" onclick="closeRules()">✕</button>
+    </div>
+    <div class="rules-body" id="rules-body">
+      <p><strong>Testregel 1 —</strong> Dit is een voorbeeldregel. Pas deze later aan met je eigen regels.</p>
+      <p><strong>Testregel 2 —</strong> Elke ronde bestaat uit 5 vragen.</p>
+      <p><strong>Testregel 3 —</strong> Een goed antwoord levert 1 punt op.</p>
+      <p><strong>Testregel 4 —</strong> Spieken op je telefoon mag natuurlijk niet 😉.</p>
+      <p><strong>Testregel 5 —</strong> Het team met de meeste punten aan het eind wint.</p>
     </div>
   </div>
 </div>
@@ -293,6 +324,7 @@ const rounds = [
 let db, roomRef, ROOM;
 let currentRoundIdx = 0;
 let activeQKey = null;
+let pendingRound = null;
 let showingAnswer = false;
 let doneQuestions = new Set();
 let players = {};
@@ -383,9 +415,21 @@ function renderRoundTabs() {
 
 window.selectRound = function(i) {
   currentRoundIdx = i;
+  pendingRound = i;
+  activeQKey = null;
   renderRoundTabs();
-  // start meteen bij de eerste vraag van deze ronde
-  selectQuestion(i, 0);
+
+  // toon eerst het 'klaar voor?' scherm i.p.v. meteen de vraag
+  document.getElementById('active-q-roundlabel').textContent = `${rounds[i].emoji} ${rounds[i].title}`;
+  document.getElementById('active-q-text').textContent = 'Zijn jullie er klaar voor maatjes?!?!';
+  document.getElementById('active-q-text').style.color = 'var(--cream)';
+  document.getElementById('active-q-answer').classList.remove('show');
+  document.getElementById('show-answer-btn').textContent = 'Toon antwoord';
+  document.getElementById('answers-list').innerHTML = '<div class="no-answers">Nog geen antwoorden</div>';
+
+  // spelers terug naar wachtscherm en oude antwoorden wissen
+  remove(ref(db, `rooms/${ROOM}/answers`));
+  update(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false });
 };
 
 function renderQuestions() {
@@ -395,6 +439,7 @@ function renderQuestions() {
 window.selectQuestion = function(ri, qi) {
   const key = `${ri}-${qi}`;
   activeQKey = key;
+  pendingRound = null;
   showingAnswer = false;
   awardedAnswers = new Set();
   revealedAnswers = new Set();
@@ -428,6 +473,14 @@ window.toggleAnswer = function() {
 };
 
 window.markDoneAndNext = function() {
+  // vanuit het 'klaar voor?' scherm: start de eerste vraag van de ronde
+  if (!activeQKey && pendingRound !== null) {
+    const r = pendingRound;
+    pendingRound = null;
+    selectQuestion(r, 0);
+    return;
+  }
+
   if (activeQKey) doneQuestions.add(activeQKey);
   // find next question
   const [ri, qi] = activeQKey ? activeQKey.split('-').map(Number) : [0, -1];
@@ -521,6 +574,14 @@ window.broadcastScoreboard = function() {
   setTimeout(() => update(ref(db, `rooms/${ROOM}/state`), { showScoreboard: false }), 8000);
 };
 
+window.openRules = function() {
+  document.getElementById('rules-overlay').classList.add('show');
+};
+
+window.closeRules = function() {
+  document.getElementById('rules-overlay').classList.remove('show');
+};
+
 window.resetGame = function() {
   if (!confirm('Weet je het zeker? Alle spelers, namen en punten worden verwijderd en het spel begint opnieuw bij vraag 1.')) return;
 
@@ -534,6 +595,7 @@ window.resetGame = function() {
   // reset alles lokaal bij de quizmaster
   currentRoundIdx = 0;
   activeQKey = null;
+  pendingRound = null;
   showingAnswer = false;
   doneQuestions = new Set();
   players = {};
