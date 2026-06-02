@@ -142,6 +142,9 @@
       <label>Kamer naam (verzin iets kort)</label>
       <input type="text" id="cfg-room" placeholder="bijv. kroeg2024" value="pubquiz" />
     </div>
+    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--cream); text-transform:none; letter-spacing:normal; margin-bottom:1rem; cursor:pointer;">
+      <input type="checkbox" id="cfg-remember" style="width:auto; cursor:pointer;" /> Onthoud dit apparaat
+    </label>
     <button class="btn btn-gold" onclick="startApp()" style="margin-top:0.5rem;">Start als Quizmaster →</button>
   </div>
   <p class="hint">Zie de <code>SETUP.md</code> voor instructies hoe je Firebase aanmaakt (gratis, 5 min)</p>
@@ -289,8 +292,18 @@ window.startApp = function() {
   const apiKey = document.getElementById('cfg-apikey').value.trim();
   const projectId = document.getElementById('cfg-projectid').value.trim();
   ROOM = document.getElementById('cfg-room').value.trim() || 'pubquiz';
+  const remember = document.getElementById('cfg-remember').checked;
 
   if (!apiKey || !projectId) { alert('Vul Firebase API key en Project ID in!'); return; }
+
+  // sla op of wis afhankelijk van het vinkje
+  if (remember) {
+    try {
+      localStorage.setItem('pubquiz_cfg', JSON.stringify({ apiKey, projectId, room: ROOM }));
+    } catch (e) {}
+  } else {
+    try { localStorage.removeItem('pubquiz_cfg'); } catch (e) {}
+  }
 
   const app = initializeApp({ apiKey, authDomain: `${projectId}.firebaseapp.com`, databaseURL: `https://${projectId}-default-rtdb.europe-west1.firebasedatabase.app`, projectId });
   db = getDatabase(app);
@@ -308,6 +321,19 @@ window.startApp = function() {
   renderRoundTabs();
   renderQuestions();
 };
+
+// bij laden: ingevulde gegevens herstellen als ze onthouden zijn
+(function restoreConfig() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('pubquiz_cfg'));
+    if (saved && saved.apiKey && saved.projectId) {
+      document.getElementById('cfg-apikey').value = saved.apiKey;
+      document.getElementById('cfg-projectid').value = saved.projectId;
+      document.getElementById('cfg-room').value = saved.room || 'pubquiz';
+      document.getElementById('cfg-remember').checked = true;
+    }
+  } catch (e) {}
+})();
 
 function listenPlayers() {
   onValue(ref(db, `rooms/${ROOM}/players`), snap => {
