@@ -47,7 +47,7 @@
   .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 6px; animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-  .grid { display: grid; grid-template-columns: 1fr 320px; gap: 1.5rem; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
   @media(max-width:700px){ .grid { grid-template-columns: 1fr; } }
 
   /* QUESTION PANEL */
@@ -62,9 +62,9 @@
 
   /* Grote ronde-categorie balk bovenaan */
   .round-tabs-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
-  .round-tabs-bar .rtab { padding: 10px 16px; font-size: 14px; border-radius: 12px; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
+  .round-tabs-bar .rtab { width: 52px; height: 52px; padding: 0; font-size: 14px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
   .round-tabs-bar .rtab:hover { border-color: var(--border2); color: var(--cream); }
-  .round-tabs-bar .rtab .rtab-emoji { font-size: 18px; }
+  .round-tabs-bar .rtab .rtab-emoji { font-size: 24px; }
 
   .q-list { display: flex; flex-direction: column; gap: 8px; }
   .q-row { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg3); cursor: pointer; transition: all 0.15s; }
@@ -75,12 +75,12 @@
   .q-text { font-size: 13px; line-height: 1.5; flex: 1; }
   .q-check { color: var(--green); font-size: 14px; }
 
-  .active-q-box { background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px; padding: 16px; margin-bottom: 1rem; }
+  .active-q-box { background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px; padding: 24px; margin-bottom: 1rem; min-height: 120px; display: flex; flex-direction: column; justify-content: center; }
   .active-q-box.big { padding: 32px; text-align: center; min-height: 140px; display: flex; flex-direction: column; justify-content: center; }
   .active-q-box.big .active-q-text { font-size: 26px; line-height: 1.4; }
   .active-q-box.big .active-q-answer { font-size: 16px; margin-top: 16px; text-align: center; justify-content: center; }
   .active-q-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
-  .active-q-text { font-size: 16px; line-height: 1.55; font-weight: 500; }
+  .active-q-text { font-size: 19px; line-height: 1.5; font-weight: 500; }
   .active-q-answer { margin-top: 10px; padding: 10px 12px; background: rgba(76,175,130,0.1); border: 1px solid rgba(76,175,130,0.25); border-radius: 8px; font-size: 13px; color: var(--green); display: none; }
   .active-q-answer.show { display: block; }
 
@@ -169,40 +169,40 @@
     <!-- Ronde categorieën -->
     <div class="round-tabs-bar" id="round-tabs"></div>
 
-    <!-- Actieve vraag (volle breedte) -->
-    <div class="panel" style="margin-bottom:1.5rem;">
-      <div class="panel-head"><span class="panel-title">Actieve vraag</span></div>
-      <div class="panel-body">
-        <div class="active-q-box big" id="active-q-box">
-          <div class="active-q-label">Geen vraag actief</div>
-          <div class="active-q-text" id="active-q-text" style="color:var(--muted);">Kies een ronde hierboven om te starten →</div>
-          <div class="active-q-answer" id="active-q-answer"></div>
-        </div>
-        <div class="btn-row">
-          <button class="btn-sm" id="show-answer-btn" onclick="toggleAnswer()">Toon antwoord</button>
-          <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag →</button>
+    <!-- Actieve vraag + Antwoorden naast elkaar -->
+    <div class="grid" style="margin-bottom:1.5rem;">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Actieve vraag</span></div>
+        <div class="panel-body">
+          <div class="active-q-box" id="active-q-box">
+            <div class="active-q-label">Geen vraag actief</div>
+            <div class="active-q-text" id="active-q-text" style="color:var(--muted);">Kies een ronde hierboven om te starten →</div>
+            <div class="active-q-answer" id="active-q-answer"></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn-sm" id="show-answer-btn" onclick="toggleAnswer()">Toon antwoord</button>
+            <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag →</button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Antwoorden + Scorebord naast elkaar -->
-    <div class="grid">
       <div class="panel">
         <div class="panel-head"><span class="panel-title">Antwoorden van spelers</span></div>
         <div class="panel-body">
           <div id="answers-list"><div class="no-answers">Nog geen antwoorden</div></div>
         </div>
       </div>
+    </div>
 
-      <div class="panel">
-        <div class="panel-head">
-          <span class="panel-title">Scorebord</span>
-          <button class="btn-sm gold" onclick="broadcastScoreboard()" style="padding:4px 10px;font-size:11px;">📺 Toon aan iedereen</button>
-        </div>
-        <div class="panel-body">
-          <div class="score-list" id="score-list">
-            <div class="empty-state">Wachten op spelers...</div>
-          </div>
+    <!-- Scorebord op volle breedte -->
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">Scorebord</span>
+        <button class="btn-sm gold" onclick="broadcastScoreboard()" style="padding:4px 10px;font-size:11px;">📺 Toon aan iedereen</button>
+      </div>
+      <div class="panel-body">
+        <div class="score-list" id="score-list">
+          <div class="empty-state">Wachten op spelers...</div>
         </div>
       </div>
     </div>
@@ -335,7 +335,7 @@ function renderPlayers() {
 
 function renderRoundTabs() {
   document.getElementById('round-tabs').innerHTML = rounds.map((r, i) =>
-    `<button class="rtab ${i === currentRoundIdx ? 'active' : ''}" onclick="selectRound(${i})"><span class="rtab-emoji">${r.emoji}</span> ${r.title}</button>`
+    `<button class="rtab ${i === currentRoundIdx ? 'active' : ''}" onclick="selectRound(${i})" title="${r.title}"><span class="rtab-emoji">${r.emoji}</span></button>`
   ).join('');
 }
 
