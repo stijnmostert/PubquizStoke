@@ -74,6 +74,8 @@
   .round-tabs-bar .rtab { width: 52px; height: 52px; padding: 0; font-size: 14px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
   .round-tabs-bar .rtab:hover { border-color: var(--border2); color: var(--cream); }
   .round-tabs-bar .rtab .rtab-emoji { font-size: 24px; }
+  .round-tabs-bar .pause-tab { border-color: var(--border2); background: rgba(78,120,168,0.1); }
+  .round-tabs-bar .pause-tab:hover { background: rgba(78,120,168,0.25); }
 
   .q-list { display: flex; flex-direction: column; gap: 8px; }
   .q-row { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg3); cursor: pointer; transition: all 0.15s; }
@@ -408,9 +410,14 @@ function renderPlayers() {
 }
 
 function renderRoundTabs() {
-  document.getElementById('round-tabs').innerHTML = rounds.map((r, i) =>
+  const mid = Math.floor(rounds.length / 2);
+  const tabs = rounds.map((r, i) =>
     `<button class="rtab ${i === currentRoundIdx ? 'active' : ''}" onclick="selectRound(${i})" title="${r.title}"><span class="rtab-emoji">${r.emoji}</span></button>`
-  ).join('');
+  );
+  // pauze-knop in het midden plaatsen
+  const pauseBtn = `<button class="rtab pause-tab" onclick="showPause()" title="Pauze"><span class="rtab-emoji">⏸️</span></button>`;
+  tabs.splice(mid, 0, pauseBtn);
+  document.getElementById('round-tabs').innerHTML = tabs.join('');
 }
 
 window.selectRound = function(i) {
@@ -432,6 +439,24 @@ window.selectRound = function(i) {
   update(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false });
 };
 
+window.showPause = function() {
+  pendingRound = null;
+  activeQKey = null;
+  currentRoundIdx = -1;
+  renderRoundTabs();
+
+  document.getElementById('active-q-roundlabel').innerHTML = '&nbsp;';
+  document.getElementById('active-q-text').textContent = 'PAUZE 🍻🎉';
+  document.getElementById('active-q-text').style.color = 'var(--cream)';
+  document.getElementById('active-q-answer').classList.remove('show');
+  document.getElementById('show-answer-btn').textContent = 'Toon antwoord';
+  document.getElementById('answers-list').innerHTML = '<div class="no-answers">Nog geen antwoorden</div>';
+
+  // spelers terug naar wachtscherm
+  remove(ref(db, `rooms/${ROOM}/answers`));
+  update(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false });
+};
+
 function renderQuestions() {
   // niet meer gebruikt (vragenlijst is verwijderd), maar laten staan zodat oude aanroepen niet crashen
 }
@@ -445,7 +470,7 @@ window.selectQuestion = function(ri, qi) {
   revealedAnswers = new Set();
 
   const q = rounds[ri].questions[qi];
-  document.getElementById('active-q-roundlabel').textContent = `Vraag ${qi+1} van de ${rounds[ri].title}`;
+  document.getElementById('active-q-roundlabel').textContent = `Vraag ${qi+1}/${rounds[ri].questions.length} van de ${rounds[ri].title}`;
   document.getElementById('active-q-text').textContent = q.q;
   document.getElementById('active-q-text').style.color = 'var(--cream)';
   document.getElementById('active-q-answer').textContent = `✓ Antwoord: ${q.a}`;
