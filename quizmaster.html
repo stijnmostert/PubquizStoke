@@ -93,7 +93,8 @@
   .active-q-answer { margin-top: 10px; padding: 10px 12px; background: rgba(76,175,130,0.1); border: 1px solid rgba(76,175,130,0.25); border-radius: 8px; font-size: 13px; color: var(--green); display: none; }
   .active-q-answer.show { display: block; }
 
-  .btn-row { display: flex; gap: 8px; margin-bottom: 1rem; }
+  .btn-row { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .btn-row .btn-sm { flex: 1; min-width: 90px; text-align: center; }
   .btn-sm { padding: 8px 14px; font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; border-radius: 8px; cursor: pointer; transition: all 0.15s; border: 1px solid var(--border2); background: transparent; color: var(--cream); }
   .btn-sm:hover { border-color: var(--gold); color: var(--gold); }
   .btn-sm.gold { background: var(--gold); color: #FFFEFD; border-color: var(--gold); }
@@ -195,9 +196,9 @@
             <div class="active-q-answer" id="active-q-answer"></div>
           </div>
           <div class="btn-row">
-            <button class="btn-sm" id="prev-q-btn" onclick="goPrev()">← Vorige vraag</button>
+            <button class="btn-sm" id="prev-q-btn" onclick="goPrev()">Vorige vraag</button>
             <button class="btn-sm" id="show-answer-btn" onclick="toggleAnswer()">Toon antwoord</button>
-            <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag →</button>
+            <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag</button>
           </div>
         </div>
       </div>
