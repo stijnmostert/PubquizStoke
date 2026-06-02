@@ -174,7 +174,18 @@ window.joinQuiz = function() {
 
   listenState();
   listenFeedback();
+
+  // detecteer wegswipen / ander tabblad / app naar achtergrond
+  document.addEventListener('visibilitychange', reportPresence);
+  window.addEventListener('blur', reportPresence);
+  window.addEventListener('focus', reportPresence);
 };
+
+function reportPresence() {
+  if (!db || !ROOM || !playerId) return;
+  const away = document.hidden;
+  update(ref(db, `rooms/${ROOM}/players/${playerId}`), { away });
+}
 
 function listenFeedback() {
   onValue(ref(db, `rooms/${ROOM}/feedback/${playerId}`), snap => {
