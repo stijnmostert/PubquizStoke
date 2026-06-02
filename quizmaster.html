@@ -7,11 +7,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
   :root {
-    --bg: #0f0e0b; --bg2: #1a1916; --bg3: #242220;
-    --gold: #f5c842; --gold2: #e6a800;
-    --cream: #f0ead8; --muted: #888070;
-    --border: rgba(245,200,66,0.15); --border2: rgba(245,200,66,0.3);
-    --green: #4caf82; --red: #e05a5a; --blue: #5b9cf6;
+    --bg: #1E2C3C; --bg2: #25364a; --bg3: #2d4055;
+    --gold: #4E78A8; --gold2: #5d89bb;
+    --cream: #FFFEFD; --muted: #8a99ac;
+    --border: rgba(211,217,226,0.15); --border2: rgba(78,120,168,0.45);
+    --green: #5bb38a; --red: #e07a7a; --blue: #4E78A8;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--cream); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
@@ -29,7 +29,7 @@
   .input-group input:focus { border-color: var(--gold); }
   .input-group input::placeholder { color: var(--muted); }
   .btn { width: 100%; padding: 12px; font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif; border-radius: 9px; border: none; cursor: pointer; transition: all 0.15s; }
-  .btn-gold { background: var(--gold); color: #0f0e0b; }
+  .btn-gold { background: var(--gold); color: #FFFEFD; }
   .btn-gold:hover { background: var(--gold2); }
   .btn-outline { background: transparent; border: 1px solid var(--border2); color: var(--cream); }
   .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
@@ -60,7 +60,7 @@
 
   .round-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 1rem; }
   .rtab { padding: 4px 10px; font-size: 11px; border-radius: 99px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif; }
-  .rtab.active { background: var(--gold); color: #0f0e0b; border-color: var(--gold); font-weight: 600; }
+  .rtab.active { background: var(--gold); color: #FFFEFD; border-color: var(--gold); font-weight: 600; }
 
   /* Grote ronde-categorie balk bovenaan */
   .round-tabs-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; justify-content: center; }
@@ -71,7 +71,7 @@
   .q-list { display: flex; flex-direction: column; gap: 8px; }
   .q-row { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg3); cursor: pointer; transition: all 0.15s; }
   .q-row:hover { border-color: var(--border2); }
-  .q-row.active { border-color: var(--gold); background: rgba(245,200,66,0.07); }
+  .q-row.active { border-color: var(--gold); background: rgba(78,120,168,0.15); }
   .q-row.done { opacity: 0.5; }
   .q-num { font-size: 11px; color: var(--muted); min-width: 24px; margin-top: 2px; }
   .q-text { font-size: 13px; line-height: 1.5; flex: 1; }
@@ -89,7 +89,7 @@
   .btn-row { display: flex; gap: 8px; margin-bottom: 1rem; }
   .btn-sm { padding: 8px 14px; font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; border-radius: 8px; cursor: pointer; transition: all 0.15s; border: 1px solid var(--border2); background: transparent; color: var(--cream); }
   .btn-sm:hover { border-color: var(--gold); color: var(--gold); }
-  .btn-sm.gold { background: var(--gold); color: #0f0e0b; border-color: var(--gold); }
+  .btn-sm.gold { background: var(--gold); color: #FFFEFD; border-color: var(--gold); }
   .btn-sm.gold:hover { background: var(--gold2); }
   .btn-sm.green { background: rgba(76,175,130,0.15); border-color: var(--green); color: var(--green); }
 
@@ -108,7 +108,7 @@
   /* SCOREBOARD SIDE */
   .score-list { display: flex; flex-direction: column; gap: 6px; }
   .score-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg3); transition: all 0.3s; }
-  .score-item.top { border-color: rgba(245,200,66,0.4); }
+  .score-item.top { border-color: rgba(78,120,168,0.55); }
   .score-rank { font-size: 13px; color: var(--muted); width: 22px; text-align: center; }
   .score-name { flex: 1; font-size: 14px; font-weight: 500; }
   .score-pts { font-size: 18px; font-weight: 600; color: var(--gold); }
