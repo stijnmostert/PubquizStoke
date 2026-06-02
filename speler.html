@@ -99,6 +99,12 @@
     <div class="waiting-sub">Even bijkomen! De quiz gaat zo verder</div>
   </div>
 
+  <!-- GEKICKT -->
+  <div id="kicked-screen" style="display:none;">
+    <div class="waiting-icon">🚫</div>
+    <div class="waiting-title">Jammer je hoort hier niet</div>
+  </div>
+
   <!-- AKKOORD MET REGELS -->
   <div id="agree-screen" style="display:none;">
     <div class="waiting-icon">📜</div>
@@ -177,12 +183,35 @@ window.joinQuiz = function() {
   listenState();
   listenFeedback();
   listenPlayersForRank();
+  listenKick();
 
   // detecteer wegswipen / ander tabblad / app naar achtergrond
   document.addEventListener('visibilitychange', reportPresence);
   window.addEventListener('blur', reportPresence);
   window.addEventListener('focus', reportPresence);
 };
+
+let isKicked = false;
+
+function listenKick() {
+  onValue(ref(db, `rooms/${ROOM}/players/${playerId}`), snap => {
+    const me = snap.val();
+    // gekickt-vlag gezet door quizmaster
+    if (me && me.kicked) {
+      isKicked = true;
+      showKicked();
+    }
+  });
+}
+
+function showKicked() {
+  ['join-screen','waiting-screen','question-screen','scoreboard-screen','pause-screen','agree-screen']
+    .forEach(id => { const e = document.getElementById(id); if (e) e.style.display = 'none'; });
+  const k = document.getElementById('kicked-screen');
+  if (k) k.style.display = 'block';
+  const ri = document.getElementById('room-info');
+  if (ri) ri.style.display = 'none';
+}
 
 let allPlayers = {};
 
@@ -242,6 +271,7 @@ function listenState() {
   onValue(ref(db, `rooms/${ROOM}/state`), snap => {
     const state = snap.val();
     if (!state) return;
+    if (isKicked) return; // gekickt: niks meer tonen
 
     // akkoord-verzoek: alleen tonen als het ná het inloggen is gestuurd en nog niet akkoord
     latestRulesAt = state.rulesRequestedAt || 0;
