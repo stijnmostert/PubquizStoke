@@ -204,7 +204,7 @@
       <div class="panel-head"><span class="panel-title" id="active-q-roundlabel">&nbsp;</span></div>
       <div class="panel-body">
         <div class="active-q-box big" id="active-q-box">
-          <div class="active-q-text" id="active-q-text" style="color:var(--muted);">Kies een ronde hierboven om te starten →</div>
+          <div class="active-q-text" id="active-q-text">Zijn jullie er klaar voor maatjes?!?!</div>
           <div class="active-q-answer" id="active-q-answer"></div>
         </div>
         <div class="btn-row">
@@ -606,8 +606,8 @@ window.resetGame = function() {
 
   // werk de schermen bij
   document.getElementById('active-q-roundlabel').innerHTML = '&nbsp;';
-  document.getElementById('active-q-text').textContent = 'Kies een ronde hierboven om te starten →';
-  document.getElementById('active-q-text').style.color = 'var(--muted)';
+  document.getElementById('active-q-text').textContent = 'Zijn jullie er klaar voor maatjes?!?!';
+  document.getElementById('active-q-text').style.color = 'var(--cream)';
   document.getElementById('active-q-answer').classList.remove('show');
   document.getElementById('show-answer-btn').textContent = 'Toon antwoord';
   document.getElementById('answers-list').innerHTML = '<div class="no-answers">Nog geen antwoorden</div>';
