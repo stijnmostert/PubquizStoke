@@ -445,7 +445,7 @@ window.selectQuestion = function(ri, qi) {
   revealedAnswers = new Set();
 
   const q = rounds[ri].questions[qi];
-  document.getElementById('active-q-roundlabel').textContent = `Ronde ${ri+1} · Vraag ${ri*5+qi+1}`;
+  document.getElementById('active-q-roundlabel').textContent = `Vraag ${qi+1} van de ${rounds[ri].title}`;
   document.getElementById('active-q-text').textContent = q.q;
   document.getElementById('active-q-text').style.color = 'var(--cream)';
   document.getElementById('active-q-answer').textContent = `✓ Antwoord: ${q.a}`;
