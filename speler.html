@@ -43,6 +43,8 @@
   .q-image { width: 100%; height: 220px; object-fit: contain; background: #fff; border-radius: 10px; padding: 14px; margin-bottom: 1rem; transition: filter 0.4s ease; }
   .q-image.blurred { filter: blur(7px); }
   #mc-buttons { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1rem; }
+  #connect-words { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
+  .connect-word { font-size: 17px; font-weight: 600; padding: 16px 10px; border-radius: 10px; background: var(--bg3); border: 1px solid var(--border2); text-align: center; }
   .mc-btn { width: 100%; text-align: left; padding: 14px 16px; font-size: 15px; font-family: 'DM Sans', sans-serif; border-radius: 10px; border: 1px solid var(--border2); background: var(--bg3); color: var(--cream); cursor: pointer; transition: all 0.15s; }
   .mc-btn:hover { border-color: var(--gold); }
   .mc-btn.selected { background: var(--gold); border-color: var(--gold); color: #FFFFFF; font-weight: 600; }
@@ -127,6 +129,7 @@
   <div id="question-screen">
     <div class="q-label" id="q-label">Vraag 1</div>
     <img id="q-image" class="q-image" style="display:none;" alt="vraagafbeelding" />
+    <div id="connect-words" style="display:none;"></div>
     <div class="q-prompt" id="q-prompt">Typ hieronder je antwoord 👇</div>
     <textarea id="answer-input" placeholder="Typ je antwoord hier..."></textarea>
     <div id="mc-buttons" style="display:none;"></div>
@@ -371,11 +374,22 @@ function showQuestion(q) {
   }
 
   const isMC = q.type === 'mc' && q.options;
+  const isConnection = q.type === 'connection' && q.words;
   const mcWrap = document.getElementById('mc-buttons');
   const textarea = document.getElementById('answer-input');
   const submitBtn = document.getElementById('submit-btn');
   const prompt = document.getElementById('q-prompt');
+  const connectWrap = document.getElementById('connect-words');
   prompt.style.display = 'block';
+
+  // connectie-woorden tonen indien aanwezig
+  if (isConnection) {
+    connectWrap.style.display = 'grid';
+    connectWrap.innerHTML = q.words.map(w => `<div class="connect-word">${w}</div>`).join('');
+  } else {
+    connectWrap.style.display = 'none';
+    connectWrap.innerHTML = '';
+  }
 
   if (isMC) {
     // multiple choice: knoppen tonen, tekstveld + insturen-knop verbergen
@@ -388,8 +402,8 @@ function showQuestion(q) {
       `<button class="mc-btn" onclick="submitMC(${oi}, '${opt.replace(/'/g, "\\'")}')"><span class="mc-letter">${letters[oi]}</span>${opt}</button>`
     ).join('');
   } else {
-    // open vraag: tekstveld + insturen-knop
-    prompt.textContent = 'Typ hieronder je antwoord 👇';
+    // open vraag (incl. connectie): tekstveld + insturen-knop
+    prompt.textContent = isConnection ? 'Wat is de connectie? Typ je antwoord 👇' : 'Typ hieronder je antwoord 👇';
     textarea.style.display = 'block';
     textarea.value = '';
     textarea.disabled = false;
