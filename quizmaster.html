@@ -323,12 +323,12 @@ const rounds = [
     { q: "Welke sport wordt gespeeld in Wimbledon?", a: "Tennis" },
     { q: "Wat is de maximale score die je in bowlen kunt halen?", a: "300 punten" }
   ]},
-  { title: "Merkenronde", emoji: "🖼️", type: "mc", image: true, blur: true, questions: [
-    { q: "Welk merk hoort bij dit logo?", image: "https://raw.githubusercontent.com/stijnmostert/PubquizStoke/main/ikea.png", options: ["IKEA", "JYSK", "Leen Bakker", "Kwantum"], correct: 0 },
-    { q: "Welk merk hoort bij dit logo?", image: "https://raw.githubusercontent.com/stijnmostert/PubquizStoke/main/shell.png", options: ["BP", "Shell", "Esso", "Texaco"], correct: 1 },
-    { q: "Welk merk hoort bij dit logo?", image: "https://raw.githubusercontent.com/stijnmostert/PubquizStoke/main/cola.png", options: ["Pepsi", "Fanta", "Coca-Cola", "Sprite"], correct: 2 },
-    { q: "Welk merk hoort bij dit logo?", image: "https://raw.githubusercontent.com/stijnmostert/PubquizStoke/main/heineken.png", options: ["Amstel", "Grolsch", "Heineken", "Bavaria"], correct: 2 },
-    { q: "Welk merk hoort bij dit logo?", image: "https://raw.githubusercontent.com/stijnmostert/PubquizStoke/main/redbull.png", options: ["Monster", "Red Bull", "Bullit", "Golden Power"], correct: 1 }
+  { title: "De Connectie", emoji: "🧩", type: "connection", questions: [
+    { words: ["Ferrari", "Lamborghini", "Maserati", "Alfa Romeo"], a: "Italiaanse automerken" },
+    { words: ["7", "11", "13", "17"], a: "Priemgetallen" },
+    { words: ["Januari", "Maart", "Mei", "Juli"], a: "Maanden met 31 dagen" },
+    { words: ["FC Barcelona", "Real Madrid", "Atlético Madrid", "Sevilla FC"], a: "Spaanse voetbalclubs" },
+    { words: ["Sahara", "Gobi", "Namib", "Kalahari"], a: "Woestijnen" }
   ]},
   { title: "Geschiedenis", emoji: "📜", type: "open", questions: [
     { q: "In welk jaar viel de Berlijnse Muur?", a: "1989" },
@@ -343,13 +343,6 @@ const rounds = [
     { q: "Hoeveel films telt de originele Star Wars-trilogie?", options: ["2", "3", "4", "5"], correct: 1 },
     { q: "Welke animatiestudio maakte Toy Story?", options: ["DreamWorks", "Pixar", "Disney", "Illumination"], correct: 1 },
     { q: "Wie regisseerde de film Inception?", options: ["Steven Spielberg", "Christopher Nolan", "James Cameron", "Quentin Tarantino"], correct: 1 }
-  ]},
-  { title: "De Connectie", emoji: "🧩", type: "connection", questions: [
-    { words: ["Ferrari", "Lamborghini", "Maserati", "Alfa Romeo"], a: "Italiaanse automerken" },
-    { words: ["7", "11", "13", "17"], a: "Priemgetallen" },
-    { words: ["Januari", "Maart", "Mei", "Juli"], a: "Maanden met 31 dagen" },
-    { words: ["FC Barcelona", "Real Madrid", "Atlético Madrid", "Sevilla FC"], a: "Spaanse voetbalclubs" },
-    { words: ["Sahara", "Gobi", "Namib", "Kalahari"], a: "Woestijnen" }
   ]}
 ];
 
@@ -358,10 +351,9 @@ const readyMessages = [
   "Zijn jullie er een beetje klaar voor of moeten we nog even wachten?!?! 😄",   // Algemene Kennis
   "Klaar om te laten zien wat jullie kunnen?!?! 💪",                            // Aardrijkskunde
   "Denken jullie dat jullie gaan winnen of wordt het spannend?!?! 👀",          // Sport
-  "Hebben jullie er een beetje zin maatjess🫵",                                 // Merkenronde
+  "Hebben jullie er een beetje zin maatjess🫵",                                 // De Connectie
   "Zit de kennis er al in of komt die straks pas?!?! 😉",                       // Geschiedenis
-  "Gaan we voor de winst of gewoon voor de gezelligheid?!?! 🍻",                // Film
-  "Zijn jullie scherp genoeg of wordt het een lange avond?!?! 😏"               // De Connectie
+  "Gaan we voor de winst of gewoon voor de gezelligheid?!?! 🍻"                 // Film
 ];
 
 let db, roomRef, ROOM;
