@@ -281,7 +281,8 @@
           <button class="btn-sm gold" onclick="broadcastScoreboard()" style="padding:4px 10px;font-size:11px;">📺 Toon</button>
         </div>
         <div class="panel-body">
-          <div class="score-list" id="score-list">
+          <div id="score-hidden-note" class="empty-state">Ranking verborgen — klik op 📺 Toon</div>
+          <div class="score-list" id="score-list" style="display:none;">
             <div class="empty-state">Wachten op spelers...</div>
           </div>
         </div>
@@ -818,9 +819,14 @@ function renderScoreboard() {
     </div>`).join('');
 }
 
+let scoreboardRevealed = false;
+
 window.broadcastScoreboard = function() {
-  update(ref(db, `rooms/${ROOM}/state`), { showScoreboard: true });
-  setTimeout(() => update(ref(db, `rooms/${ROOM}/state`), { showScoreboard: false }), 8000);
+  scoreboardRevealed = !scoreboardRevealed;
+  document.getElementById('score-list').style.display = scoreboardRevealed ? '' : 'none';
+  document.getElementById('score-hidden-note').style.display = scoreboardRevealed ? 'none' : '';
+  // toon/verberg ook bij de spelers
+  update(ref(db, `rooms/${ROOM}/state`), { showScoreboard: scoreboardRevealed });
 };
 
 window.openRules = function() {
