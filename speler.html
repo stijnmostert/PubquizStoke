@@ -367,6 +367,7 @@ function showQuestion(q) {
   const textarea = document.getElementById('answer-input');
   const submitBtn = document.getElementById('submit-btn');
   const prompt = document.getElementById('q-prompt');
+  prompt.style.display = 'block';
 
   if (isMC) {
     // multiple choice: knoppen tonen, tekstveld + insturen-knop verbergen
@@ -438,9 +439,9 @@ window.submitMC = function(index, optionText) {
   const answer = `${letters[index]}. ${optionText}`;
   set(ref(db, `rooms/${ROOM}/answers/${playerId}`), { answer, playerName, submittedAt: Date.now() });
 
-  // markeer de gekozen knop en blokkeer de rest
-  const btns = document.querySelectorAll('.mc-btn');
-  btns.forEach((b, i) => { b.disabled = true; if (i === index) b.classList.add('selected'); });
+  // verberg de keuzeknoppen en de prompt, toon alleen de bevestiging
+  document.getElementById('mc-buttons').style.display = 'none';
+  document.getElementById('q-prompt').style.display = 'none';
 
   document.getElementById('submitted-box').classList.add('show');
   document.getElementById('submitted-answer-text').textContent = `Jouw antwoord: ${answer}`;
