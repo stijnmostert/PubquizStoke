@@ -263,18 +263,16 @@ function listenFeedback() {
     const el = document.getElementById('feedback-result');
     const rankEl = document.getElementById('feedback-rank');
     if (!el) return;
+    if (rankEl) rankEl.textContent = '';
     if (result === 'correct') {
       el.textContent = '✅';
       el.classList.add('show');
-      showMyRank();
     } else if (result === 'wrong') {
       el.textContent = '❌';
       el.classList.add('show');
-      showMyRank();
     } else {
       el.textContent = '';
       el.classList.remove('show');
-      if (rankEl) rankEl.textContent = '';
     }
   });
 }
