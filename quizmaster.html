@@ -92,8 +92,8 @@
   .active-q-box.big .active-q-answer { font-size: 16px; margin-top: 16px; text-align: center; justify-content: center; }
   .active-q-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
   .active-q-text { font-size: 19px; line-height: 1.5; font-weight: 500; }
-  .q-image { max-width: 100%; max-height: 220px; border-radius: 10px; margin-bottom: 14px; transition: filter 0.4s ease; }
-  .q-image.blurred { filter: blur(12px); }
+  .q-image { width: 100%; height: 200px; object-fit: contain; background: #fff; border-radius: 10px; padding: 12px; margin-bottom: 14px; transition: filter 0.4s ease; }
+  .q-image.blurred { filter: blur(7px); }
   .mc-options { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; text-align: left; }
   .mc-option { font-size: 15px; padding: 8px 14px; border-radius: 8px; background: var(--bg2); border: 1px solid var(--border); }
   .active-q-answer { margin-top: 10px; padding: 10px 12px; background: rgba(76,175,130,0.1); border: 1px solid rgba(76,175,130,0.25); border-radius: 8px; font-size: 13px; color: var(--green); display: none; }
@@ -321,12 +321,12 @@ const rounds = [
     { q: "Welke sport wordt gespeeld in Wimbledon?", a: "Tennis" },
     { q: "Wat is de maximale score die je in bowlen kunt halen?", a: "300 punten" }
   ]},
-  { title: "De Plaatjesronde", emoji: "🖼️", type: "mc", image: true, blur: true, questions: [
-    { q: "Welk dier zie je op de foto? (testplaatje)", image: "https://picsum.photos/seed/dier/500/300", options: ["Hond", "Kat", "Paard", "Konijn"], correct: 0 },
-    { q: "Welk landschap is dit? (testplaatje)", image: "https://picsum.photos/seed/berg/500/300", options: ["Strand", "Berg", "Woestijn", "Bos"], correct: 1 },
-    { q: "Welk gebouw staat op de foto? (testplaatje)", image: "https://picsum.photos/seed/gebouw/500/300", options: ["Kerk", "Kasteel", "Wolkenkrabber", "Molen"], correct: 2 },
-    { q: "Welk voertuig zie je? (testplaatje)", image: "https://picsum.photos/seed/auto/500/300", options: ["Fiets", "Auto", "Trein", "Boot"], correct: 1 },
-    { q: "Welke vrucht is dit? (testplaatje)", image: "https://picsum.photos/seed/fruit/500/300", options: ["Appel", "Peer", "Banaan", "Sinaasappel"], correct: 0 }
+  { title: "Merkenronde", emoji: "🖼️", type: "mc", image: true, blur: true, questions: [
+    { q: "Welk merk hoort bij dit logo?", image: "https://raw.githubusercontent.com/stijnmostert/PubquizStoke/main/ikea.png", options: ["IKEA", "JYSK", "Leen Bakker", "Kwantum"], correct: 0 },
+    { q: "Welk merk hoort bij dit logo?", image: "https://raw.githubusercontent.com/stijnmostert/PubquizStoke/main/shell.png", options: ["BP", "Shell", "Esso", "Texaco"], correct: 1 },
+    { q: "Welk merk hoort bij dit logo?", image: "https://raw.githubusercontent.com/stijnmostert/PubquizStoke/main/cola.png", options: ["Pepsi", "Fanta", "Coca-Cola", "Sprite"], correct: 2 },
+    { q: "Welk merk hoort bij dit logo?", image: "https://raw.githubusercontent.com/stijnmostert/PubquizStoke/main/heineken.png", options: ["Amstel", "Grolsch", "Heineken", "Bavaria"], correct: 2 },
+    { q: "Welk merk hoort bij dit logo?", image: "https://raw.githubusercontent.com/stijnmostert/PubquizStoke/main/redbull.png", options: ["Monster", "Red Bull", "Bullit", "Golden Power"], correct: 1 }
   ]},
   { title: "Geschiedenis", emoji: "📜", type: "open", questions: [
     { q: "In welk jaar viel de Berlijnse Muur?", a: "1989" },
@@ -349,7 +349,7 @@ const readyMessages = [
   "Zijn jullie er een beetje klaar voor of moeten we nog even wachten?!?! 😄",   // Algemene Kennis
   "Klaar om te laten zien wat jullie kunnen?!?! 💪",                            // Aardrijkskunde
   "Denken jullie dat jullie gaan winnen of wordt het spannend?!?! 👀",          // Sport
-  "Hebben jullie er een beetje zin maatjess🫵",                                 // De Plaatjesronde
+  "Hebben jullie er een beetje zin maatjess🫵",                                 // Merkenronde
   "Zit de kennis er al in of komt die straks pas?!?! 😉",                       // Geschiedenis
   "Gaan we voor de winst of gewoon voor de gezelligheid?!?! 🍻"                 // Film
 ];
