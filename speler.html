@@ -40,7 +40,8 @@
   #question-screen { display: none; }
   .q-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
   .q-prompt { font-size: 15px; color: var(--muted); line-height: 1.5; margin-bottom: 1.5rem; }
-  .q-image { width: 100%; max-height: 240px; object-fit: contain; border-radius: 10px; margin-bottom: 1rem; }
+  .q-image { width: 100%; max-height: 240px; object-fit: contain; border-radius: 10px; margin-bottom: 1rem; transition: filter 0.4s ease; }
+  .q-image.blurred { filter: blur(12px); }
   #mc-buttons { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1rem; }
   .mc-btn { width: 100%; text-align: left; padding: 14px 16px; font-size: 15px; font-family: 'DM Sans', sans-serif; border-radius: 10px; border: 1px solid var(--border2); background: var(--bg3); color: var(--cream); cursor: pointer; transition: all 0.15s; }
   .mc-btn:hover { border-color: var(--gold); }
@@ -307,6 +308,11 @@ function listenState() {
         hasSubmitted = false;
         showQuestion(q);
       }
+      // blur weghalen zodra het antwoord wordt getoond (scherpe foto)
+      const imgEl = document.getElementById('q-image');
+      if (imgEl && q.blur) {
+        imgEl.classList.toggle('blurred', !state.showAnswer);
+      }
     } else {
       showWaiting();
     }
@@ -357,9 +363,11 @@ function showQuestion(q) {
   if (q.image) {
     imgEl.src = q.image;
     imgEl.style.display = 'block';
+    imgEl.classList.toggle('blurred', !!q.blur);
   } else {
     imgEl.style.display = 'none';
     imgEl.src = '';
+    imgEl.classList.remove('blurred');
   }
 
   const isMC = q.type === 'mc' && q.options;
