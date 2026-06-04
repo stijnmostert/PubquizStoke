@@ -96,6 +96,8 @@
   .q-image.blurred { filter: blur(7px); }
   .mc-options { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; text-align: left; }
   .mc-option { font-size: 15px; padding: 8px 14px; border-radius: 8px; background: var(--bg2); border: 1px solid var(--border); }
+  .connect-words { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0; }
+  .connect-word { font-size: 18px; font-weight: 600; padding: 14px; border-radius: 10px; background: var(--bg2); border: 1px solid var(--border2); text-align: center; }
   .active-q-answer { margin-top: 10px; padding: 10px 12px; background: rgba(76,175,130,0.1); border: 1px solid rgba(76,175,130,0.25); border-radius: 8px; font-size: 13px; color: var(--green); display: none; }
   .active-q-answer.show { display: block; }
 
@@ -341,6 +343,13 @@ const rounds = [
     { q: "Hoeveel films telt de originele Star Wars-trilogie?", options: ["2", "3", "4", "5"], correct: 1 },
     { q: "Welke animatiestudio maakte Toy Story?", options: ["DreamWorks", "Pixar", "Disney", "Illumination"], correct: 1 },
     { q: "Wie regisseerde de film Inception?", options: ["Steven Spielberg", "Christopher Nolan", "James Cameron", "Quentin Tarantino"], correct: 1 }
+  ]},
+  { title: "De Connectie", emoji: "🔗", type: "connection", questions: [
+    { words: ["Harten", "Klaveren", "Ruiten", "Schoppen"], a: "De symbolen (kleuren) van speelkaarten" },
+    { words: ["Noord", "Oost", "Zuid", "West"], a: "De windrichtingen" },
+    { words: ["Maan", "Woens", "Donder", "Vrij"], a: "...dag — dagen van de week" },
+    { words: ["Rode", "Zwarte", "Bos", "Aard"], a: "Soorten bessen (rode bes, zwarte bes, bosbes, aardbei)" },
+    { words: ["Goud", "Zilver", "Brons", "Platina"], a: "Edelmetalen" }
   ]}
 ];
 
@@ -351,7 +360,8 @@ const readyMessages = [
   "Denken jullie dat jullie gaan winnen of wordt het spannend?!?! 👀",          // Sport
   "Hebben jullie er een beetje zin maatjess🫵",                                 // Merkenronde
   "Zit de kennis er al in of komt die straks pas?!?! 😉",                       // Geschiedenis
-  "Gaan we voor de winst of gewoon voor de gezelligheid?!?! 🍻"                 // Film
+  "Gaan we voor de winst of gewoon voor de gezelligheid?!?! 🍻",                // Film
+  "Zijn jullie scherp genoeg of wordt het een lange avond?!?! 😏"               // De Connectie
 ];
 
 let db, roomRef, ROOM;
@@ -545,6 +555,7 @@ window.selectQuestion = function(ri, qi) {
   const q = rounds[ri].questions[qi];
   const round = rounds[ri];
   const isMC = round.type === 'mc';
+  const isConnection = round.type === 'connection';
   const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
   document.getElementById('active-q-roundlabel').textContent = `Vraag ${qi+1}/${rounds[ri].questions.length} van de ${rounds[ri].title}`;
@@ -555,7 +566,12 @@ window.selectQuestion = function(ri, qi) {
   if (q.image) {
     qHtml += `<img src="${q.image}" class="q-image${useBlur ? ' blurred' : ''}" id="qm-image" data-blur="${useBlur ? '1' : '0'}" alt="vraagafbeelding" />`;
   }
-  qHtml += `<div>${q.q}</div>`;
+  if (isConnection && q.words) {
+    qHtml += '<div class="connect-words">' + q.words.map(w => `<div class="connect-word">${w}</div>`).join('') + '</div>';
+    qHtml += `<div style="font-size:15px;color:var(--muted);margin-top:8px;">Wat is de connectie?</div>`;
+  } else {
+    qHtml += `<div>${q.q}</div>`;
+  }
   if (isMC && q.options) {
     qHtml += '<div class="mc-options">' + q.options.map((opt, oi) =>
       `<div class="mc-option">${letters[oi]}. ${opt}</div>`
@@ -576,16 +592,17 @@ window.selectQuestion = function(ri, qi) {
   remove(ref(db, `rooms/${ROOM}/answers`));
   remove(ref(db, `rooms/${ROOM}/feedback`));
 
-  // broadcast active question (incl. type, opties en afbeelding voor de spelers)
+  // broadcast active question (incl. type, opties, afbeelding en connectie-woorden)
   update(ref(db, `rooms/${ROOM}/state`), {
     activeQuestion: {
-      ri, qi, text: q.q,
+      ri, qi, text: q.q || '',
       title: rounds[ri].title,
       total: rounds[ri].questions.length,
       type: round.type || 'open',
       options: (isMC && q.options) ? q.options : null,
       image: q.image || null,
-      blur: useBlur ? true : false
+      blur: useBlur ? true : false,
+      words: (isConnection && q.words) ? q.words : null
     },
     showAnswer: false,
     showScoreboard: false,
