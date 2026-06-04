@@ -176,6 +176,16 @@
   .rules-body strong { color: var(--gold); }
   .rules-foot { padding: 14px 22px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); text-align: center; }
   .rules-foot span { color: var(--cream); font-weight: 600; }
+
+  /* Uitslag pop-up */
+  #results-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 1.5rem; }
+  #results-overlay.show { display: flex; }
+  .results-list { display: flex; flex-direction: column; gap: 8px; }
+  .results-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; background: var(--bg3); border: 1px solid var(--border); }
+  .results-row.winner { border-color: var(--gold); background: rgba(78,120,168,0.18); }
+  .results-rank { font-size: 18px; width: 32px; text-align: center; }
+  .results-name { flex: 1; font-size: 16px; font-weight: 500; color: var(--cream); }
+  .results-pts { font-size: 16px; font-weight: 600; color: var(--gold); }
 </style>
 </head>
 <body>
@@ -249,6 +259,7 @@
           <button class="btn-sm" id="prev-q-btn" onclick="goPrev()">Vorige vraag</button>
           <button class="btn-sm" id="show-answer-btn" onclick="toggleAnswer()">Toon antwoord</button>
           <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag</button>
+          <button class="btn-sm gold" id="results-btn" onclick="showResults()" style="display:none;">🏆 Uitslag</button>
         </div>
       </div>
     </div>
@@ -294,6 +305,17 @@
       <p><strong>Testregel 5 —</strong> Het team met de meeste punten aan het eind wint.</p>
     </div>
     <div class="rules-foot" id="rules-foot">✅ <span id="agree-count">0</span> van de <span id="agree-total">0</span> spelers akkoord</div>
+  </div>
+</div>
+
+<!-- Uitslag pop-up -->
+<div id="results-overlay" onclick="closeResults(event)">
+  <div class="rules-modal" onclick="event.stopPropagation()">
+    <div class="rules-head">
+      <span class="rules-title">🏆 De Uitslag</span>
+      <button class="rules-close" onclick="closeResults()">✕</button>
+    </div>
+    <div class="rules-body" id="results-body"></div>
   </div>
 </div>
 
@@ -544,6 +566,12 @@ window.selectQuestion = function(ri, qi) {
   wrongAnswers = new Set();
   revealedAnswers = new Set();
 
+  // normale knoppen terug, uitslag-knop verbergen
+  document.getElementById('prev-q-btn').style.display = '';
+  document.getElementById('show-answer-btn').style.display = '';
+  document.getElementById('next-q-btn').style.display = '';
+  document.getElementById('results-btn').style.display = 'none';
+
   const q = rounds[ri].questions[qi];
   const round = rounds[ri];
   const isMC = round.type === 'mc';
@@ -642,6 +670,8 @@ window.markDoneAndNext = function() {
   if (qi + 1 >= rounds[ri].questions.length) {
     // ronde vlak vóór de pauze → eerst pauzescherm
     if (ri === mid - 1) { showPause(); return; }
+    // laatste vraag van de laatste ronde → eindscherm met Uitslag-knop
+    if (ri + 1 >= rounds.length) { showEndScreen(); return; }
     // anders: naar de volgende ronde, maar eerst de opwarm-zin tonen
     if (ri + 1 < rounds.length) { selectRound(ri + 1); }
     return;
@@ -649,6 +679,43 @@ window.markDoneAndNext = function() {
 
   // gewoon de volgende vraag binnen dezelfde ronde
   selectQuestion(ri, qi + 1);
+};
+
+function showEndScreen() {
+  activeQKey = null;
+  document.getElementById('active-q-roundlabel').innerHTML = '&nbsp;';
+  document.getElementById('active-q-text').innerHTML = '🎉 Dat was de laatste vraag! Klik op Uitslag voor de winnaars.';
+  document.getElementById('active-q-text').style.color = 'var(--cream)';
+  document.getElementById('active-q-answer').classList.remove('show');
+  // knoppen vorige/toon/volgende verbergen, uitslag tonen
+  document.getElementById('prev-q-btn').style.display = 'none';
+  document.getElementById('show-answer-btn').style.display = 'none';
+  document.getElementById('next-q-btn').style.display = 'none';
+  document.getElementById('results-btn').style.display = 'block';
+}
+
+window.showResults = function() {
+  // bouw top 10 met punten
+  const sorted = Object.entries(players)
+    .map(([k, v]) => ({ name: v.name, score: v.score || 0 }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10);
+
+  const medal = (i) => i === 0 ? '🏆' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+  document.getElementById('results-body').innerHTML = sorted.length
+    ? '<div class="results-list">' + sorted.map((p, i) =>
+        `<div class="results-row${i === 0 ? ' winner' : ''}"><span class="results-rank">${medal(i)}</span><span class="results-name">${p.name}</span><span class="results-pts">${p.score} ${p.score === 1 ? 'punt' : 'punten'}</span></div>`
+      ).join('') + '</div>'
+    : '<p style="text-align:center;color:var(--muted);">Nog geen spelers.</p>';
+
+  document.getElementById('results-overlay').classList.add('show');
+  // toon het scorebord ook bij de spelers
+  update(ref(db, `rooms/${ROOM}/state`), { showScoreboard: true });
+};
+
+window.closeResults = function() {
+  document.getElementById('results-overlay').classList.remove('show');
+  update(ref(db, `rooms/${ROOM}/state`), { showScoreboard: false });
 };
 
 window.goPrev = function() {
@@ -801,6 +868,11 @@ window.resetGame = function() {
   document.getElementById('active-q-answer').classList.remove('show');
   document.getElementById('show-answer-btn').textContent = 'Toon antwoord';
   document.getElementById('answers-list').innerHTML = '<div class="no-answers">Nog geen antwoorden</div>';
+  // knoppen herstellen, uitslag verbergen
+  document.getElementById('prev-q-btn').style.display = '';
+  document.getElementById('show-answer-btn').style.display = '';
+  document.getElementById('next-q-btn').style.display = '';
+  document.getElementById('results-btn').style.display = 'none';
 
   renderRoundTabs();
   renderQuestions();
