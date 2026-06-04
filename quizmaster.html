@@ -92,6 +92,9 @@
   .active-q-box.big .active-q-answer { font-size: 16px; margin-top: 16px; text-align: center; justify-content: center; }
   .active-q-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
   .active-q-text { font-size: 19px; line-height: 1.5; font-weight: 500; }
+  .q-image { max-width: 100%; max-height: 220px; border-radius: 10px; margin-bottom: 14px; }
+  .mc-options { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; text-align: left; }
+  .mc-option { font-size: 15px; padding: 8px 14px; border-radius: 8px; background: var(--bg2); border: 1px solid var(--border); }
   .active-q-answer { margin-top: 10px; padding: 10px 12px; background: rgba(76,175,130,0.1); border: 1px solid rgba(76,175,130,0.25); border-radius: 8px; font-size: 13px; color: var(--green); display: none; }
   .active-q-answer.show { display: block; }
 
@@ -296,74 +299,58 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getDatabase, ref, set, onValue, update, push, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const rounds = [
-  { title: "Algemene kennis", emoji: "🌍", questions: [
-    { q: "Welk land heeft de meeste tijdzones ter wereld?", a: "Frankrijk (12 tijdzones)" },
-    { q: "Wat is de internationale noodoproeporganisatie die het rode kruis-symbool gebruikt?", a: "Het Rode Kruis (ICRC)" },
-    { q: "In welk jaar werd de euro ingevoerd als chartaal geld?", a: "2002" },
-    { q: "Welke twee landen delen de langste landgrens ter wereld?", a: "Canada en de VS" },
-    { q: "Hoeveel ogen zitten er in totaal op twee standaard dobbelstenen?", a: "42" }
+  { title: "Algemene Kennis", emoji: "🧠", type: "mc", questions: [
+    { q: "Hoeveel minuten zitten er in een etmaal?", options: ["1200", "1440", "1600", "2400"], correct: 1 },
+    { q: "Welk dier is het grootste ter wereld?", options: ["Olifant", "Blauwe vinvis", "Walvishaai", "Giraffe"], correct: 1 },
+    { q: "Hoeveel kleuren heeft een regenboog traditioneel?", options: ["5", "6", "7", "8"], correct: 2 },
+    { q: "Wat is de chemische afkorting voor goud?", options: ["Go", "Au", "Gd", "Ag"], correct: 1 },
+    { q: "Welke planeet staat het dichtst bij de zon?", options: ["Venus", "Mars", "Mercurius", "Aarde"], correct: 2 }
   ]},
-  { title: "Muziek", emoji: "🎵", questions: [
-    { q: "Welke Nederlandse band scoorde een wereldhit met 'Radar Love'?", a: "Golden Earring" },
-    { q: "Hoe heet het debuutalbum van Amy Winehouse?", a: "Frank (2003)" },
-    { q: "Welk instrument bespeelt Toots Thielemans waarmee hij wereldberoemd werd?", a: "Mondharmonica" },
-    { q: "In welke stad is platenlabel Motown Records opgericht?", a: "Detroit" },
-    { q: "Welk nummer van Stromae verwijst naar een vogel en gaat over een verdwijnende vader?", a: "Papaoutai" }
+  { title: "Aardrijkskunde & Topografie", emoji: "🗺️", type: "open", questions: [
+    { q: "Welke Europese hoofdstad ligt het verst naar het noorden?", a: "Reykjavik (IJsland)" },
+    { q: "Door hoeveel landen stroomt de rivier de Rijn?", a: "6 landen" },
+    { q: "Welke oceaan is de grootste ter wereld?", a: "De Grote Oceaan (Stille Oceaan)" },
+    { q: "Hoe heet de beroemde woestijn in Noord-Afrika?", a: "De Sahara" },
+    { q: "In welk land liggen de Galapagoseilanden?", a: "Ecuador" }
   ]},
-  { title: "Natuur & Wetenschap", emoji: "🔬", questions: [
-    { q: "Welk orgaan in het menselijk lichaam maakt insuline aan?", a: "De alvleesklier (pancreas)" },
-    { q: "Hoeveel chromosomen heeft een gezonde menselijke lichaamscel?", a: "46 (23 paar)" },
-    { q: "Wat is de naam van het laagje rond de aarde dat ons beschermt tegen UV-straling?", a: "De ozonlaag" },
-    { q: "Welk metaal is vloeibaar bij kamertemperatuur?", a: "Kwik" },
-    { q: "Op hoeveel graden Celsius kookt water op zeeniveau?", a: "100°C" }
-  ]},
-  { title: "Film & TV", emoji: "🎬", questions: [
-    { q: "Welke acteur speelt Walter White in Breaking Bad?", a: "Bryan Cranston" },
-    { q: "In welk fictief Afrikaans land speelt Black Panther zich af?", a: "Wakanda" },
-    { q: "Hoeveel seizoenen telt de originele serie Game of Thrones?", a: "8 seizoenen" },
-    { q: "Welke regisseur maakte Pulp Fiction en Kill Bill?", a: "Quentin Tarantino" },
-    { q: "Welke Netflix-serie gaat over overvallers met maskers van Salvador Dalí?", a: "La Casa de Papel" }
-  ]},
-  { title: "Sport", emoji: "⚽", questions: [
-    { q: "Welke club won de eerste UEFA Champions League (seizoen 1992/93)?", a: "Marseille" },
-    { q: "Hoeveel spelers staan er per team op het veld tijdens een basketbalwedstrijd?", a: "5" },
+  { title: "Sport", emoji: "⚽", type: "open", questions: [
+    { q: "Welke club won de eerste UEFA Champions League (1992/93)?", a: "Marseille" },
+    { q: "Hoeveel spelers staan er per team op het veld bij basketbal?", a: "5" },
     { q: "In welk jaar won Oranje het EK voetbal?", a: "1988" },
     { q: "Welke sport wordt gespeeld in Wimbledon?", a: "Tennis" },
     { q: "Wat is de maximale score die je in bowlen kunt halen?", a: "300 punten" }
   ]},
-  { title: "Eten & Drinken", emoji: "🍕", questions: [
-    { q: "Uit welke twee basisingrediënten bestaat hollandaise saus?", a: "Eidooiers en geklaard boter" },
-    { q: "Welk biertype uit België wordt vaak in een kelkvormig glas geserveerd?", a: "Trappist / Dubbel / Tripel" },
-    { q: "Hoe heet de Japanse drank gemaakt van gefermenteerde rijst?", a: "Sake" },
-    { q: "Welk Italiaans gerecht betekent letterlijk 'opgepikt' of 'opgepeurd'?", a: "Tiramisù" },
-    { q: "In welk land is de stroopwafel uitgevonden?", a: "Nederland (Gouda)" }
+  { title: "De Plaatjesronde", emoji: "🖼️", type: "mc", image: true, questions: [
+    { q: "Welk dier zie je op de foto? (testplaatje)", image: "https://picsum.photos/seed/dier/500/300", options: ["Hond", "Kat", "Paard", "Konijn"], correct: 0 },
+    { q: "Welk landschap is dit? (testplaatje)", image: "https://picsum.photos/seed/berg/500/300", options: ["Strand", "Berg", "Woestijn", "Bos"], correct: 1 },
+    { q: "Welk gebouw staat op de foto? (testplaatje)", image: "https://picsum.photos/seed/gebouw/500/300", options: ["Kerk", "Kasteel", "Wolkenkrabber", "Molen"], correct: 2 },
+    { q: "Welk voertuig zie je? (testplaatje)", image: "https://picsum.photos/seed/auto/500/300", options: ["Fiets", "Auto", "Trein", "Boot"], correct: 1 },
+    { q: "Welke vrucht is dit? (testplaatje)", image: "https://picsum.photos/seed/fruit/500/300", options: ["Appel", "Peer", "Banaan", "Sinaasappel"], correct: 0 }
   ]},
-  { title: "Aardrijkskunde", emoji: "🗺️", questions: [
-    { q: "Welke Europese hoofdstad ligt het verst naar het noorden?", a: "Reykjavik (IJsland)" },
-    { q: "Door hoeveel landen stroomt de rivier de Rijn?", a: "6 landen" },
-    { q: "Welke oceaan is de grootste ter wereld?", a: "De Grote Oceaan (Stille Oceaan)" },
-    { q: "Hoe heet de beroemde woestijn die zich uitstrekt over Noord-Afrika?", a: "De Sahara" },
-    { q: "In welk land liggen de Galapagoseilanden?", a: "Ecuador" }
+  { title: "Geschiedenis", emoji: "📜", type: "open", questions: [
+    { q: "In welk jaar viel de Berlijnse Muur?", a: "1989" },
+    { q: "Wie was de eerste president van de Verenigde Staten?", a: "George Washington" },
+    { q: "In welk jaar begon de Tweede Wereldoorlog?", a: "1939" },
+    { q: "Welk schip zonk in 1912 op zijn eerste reis?", a: "De Titanic" },
+    { q: "Welke Egyptische koningin had relaties met Julius Caesar en Marcus Antonius?", a: "Cleopatra" }
   ]},
-  { title: "Pot luck", emoji: "🎲", questions: [
-    { q: "Welk jaar werd Facebook opgericht door Mark Zuckerberg?", a: "2004" },
-    { q: "Hoe heet de uitvinder van de gloeilamp?", a: "Thomas Edison" },
-    { q: "Welke taal wordt het meest gesproken in Brazilië?", a: "Portugees" },
-    { q: "Hoeveel letters telt het Nederlandse alfabet?", a: "26" },
-    { q: "Welk spel wordt gespeeld met zwarte en witte stenen op een 8x8 bord?", a: "Dammen (of schaken)" }
+  { title: "Film", emoji: "🎬", type: "mc", questions: [
+    { q: "Welke acteur speelt Jack in Titanic?", options: ["Brad Pitt", "Leonardo DiCaprio", "Tom Cruise", "Johnny Depp"], correct: 1 },
+    { q: "In welk fictief land speelt Black Panther zich af?", options: ["Zamunda", "Wakanda", "Genovia", "Latveria"], correct: 1 },
+    { q: "Hoeveel films telt de originele Star Wars-trilogie?", options: ["2", "3", "4", "5"], correct: 1 },
+    { q: "Welke animatiestudio maakte Toy Story?", options: ["DreamWorks", "Pixar", "Disney", "Illumination"], correct: 1 },
+    { q: "Wie regisseerde de film Inception?", options: ["Steven Spielberg", "Christopher Nolan", "James Cameron", "Quentin Tarantino"], correct: 1 }
   ]}
 ];
 
 // Eén opwarm-zin per ronde (zelfde volgorde als de rondes hierboven)
 const readyMessages = [
-  "Zijn jullie er een beetje klaar voor of moeten we nog even wachten?!?! 😄",   // Algemene kennis
-  "Hebben jullie er een beetje zin maatjess🫵",                                 // Muziek
-  "Zit de kennis er al in of komt die straks pas?!?! 😉",                        // Natuur & Wetenschap
-  "Gaan we voor de winst of gewoon voor de gezelligheid?!?! 🍻",                 // Film & TV
-  "Denken jullie dat jullie gaan winnen of wordt het spannend?!?! 👀",          // Sport
-  "Zijn jullie scherp genoeg of wordt het een lange avond?!?! 😏",              // Eten & Drinken
+  "Zijn jullie er een beetje klaar voor of moeten we nog even wachten?!?! 😄",   // Algemene Kennis
   "Klaar om te laten zien wat jullie kunnen?!?! 💪",                            // Aardrijkskunde
-  "Hebben jullie je hersens al aangezet vanavond?!?! 🧠✨"                        // Pot luck
+  "Denken jullie dat jullie gaan winnen of wordt het spannend?!?! 👀",          // Sport
+  "Hebben jullie er een beetje zin maatjess🫵",                                 // De Plaatjesronde
+  "Zit de kennis er al in of komt die straks pas?!?! 😉",                       // Geschiedenis
+  "Gaan we voor de winst of gewoon voor de gezelligheid?!?! 🍻"                 // Film
 ];
 
 let db, roomRef, ROOM;
@@ -555,10 +542,31 @@ window.selectQuestion = function(ri, qi) {
   revealedAnswers = new Set();
 
   const q = rounds[ri].questions[qi];
+  const round = rounds[ri];
+  const isMC = round.type === 'mc';
+  const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+
   document.getElementById('active-q-roundlabel').textContent = `Vraag ${qi+1}/${rounds[ri].questions.length} van de ${rounds[ri].title}`;
-  document.getElementById('active-q-text').textContent = q.q;
+
+  // bouw de weergave voor de quizmaster
+  let qHtml = '';
+  if (q.image) {
+    qHtml += `<img src="${q.image}" class="q-image" alt="vraagafbeelding" />`;
+  }
+  qHtml += `<div>${q.q}</div>`;
+  if (isMC && q.options) {
+    qHtml += '<div class="mc-options">' + q.options.map((opt, oi) =>
+      `<div class="mc-option">${letters[oi]}. ${opt}</div>`
+    ).join('') + '</div>';
+  }
+  document.getElementById('active-q-text').innerHTML = qHtml;
   document.getElementById('active-q-text').style.color = 'var(--cream)';
-  document.getElementById('active-q-answer').textContent = `✓ Antwoord: ${q.a}`;
+
+  // juiste antwoord
+  const answerText = isMC && q.options
+    ? `${letters[q.correct]}. ${q.options[q.correct]}`
+    : q.a;
+  document.getElementById('active-q-answer').textContent = `✓ Antwoord: ${answerText}`;
   document.getElementById('active-q-answer').classList.remove('show');
   document.getElementById('show-answer-btn').textContent = 'Toon antwoord';
 
@@ -566,9 +574,16 @@ window.selectQuestion = function(ri, qi) {
   remove(ref(db, `rooms/${ROOM}/answers`));
   remove(ref(db, `rooms/${ROOM}/feedback`));
 
-  // broadcast active question
+  // broadcast active question (incl. type, opties en afbeelding voor de spelers)
   update(ref(db, `rooms/${ROOM}/state`), {
-    activeQuestion: { ri, qi, text: q.q, title: rounds[ri].title, total: rounds[ri].questions.length },
+    activeQuestion: {
+      ri, qi, text: q.q,
+      title: rounds[ri].title,
+      total: rounds[ri].questions.length,
+      type: round.type || 'open',
+      options: (isMC && q.options) ? q.options : null,
+      image: q.image || null
+    },
     showAnswer: false,
     showScoreboard: false,
     paused: false
