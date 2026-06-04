@@ -92,7 +92,8 @@
   .active-q-box.big .active-q-answer { font-size: 16px; margin-top: 16px; text-align: center; justify-content: center; }
   .active-q-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
   .active-q-text { font-size: 19px; line-height: 1.5; font-weight: 500; }
-  .q-image { max-width: 100%; max-height: 220px; border-radius: 10px; margin-bottom: 14px; }
+  .q-image { max-width: 100%; max-height: 220px; border-radius: 10px; margin-bottom: 14px; transition: filter 0.4s ease; }
+  .q-image.blurred { filter: blur(12px); }
   .mc-options { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; text-align: left; }
   .mc-option { font-size: 15px; padding: 8px 14px; border-radius: 8px; background: var(--bg2); border: 1px solid var(--border); }
   .active-q-answer { margin-top: 10px; padding: 10px 12px; background: rgba(76,175,130,0.1); border: 1px solid rgba(76,175,130,0.25); border-radius: 8px; font-size: 13px; color: var(--green); display: none; }
@@ -320,7 +321,7 @@ const rounds = [
     { q: "Welke sport wordt gespeeld in Wimbledon?", a: "Tennis" },
     { q: "Wat is de maximale score die je in bowlen kunt halen?", a: "300 punten" }
   ]},
-  { title: "De Plaatjesronde", emoji: "🖼️", type: "mc", image: true, questions: [
+  { title: "De Plaatjesronde", emoji: "🖼️", type: "mc", image: true, blur: true, questions: [
     { q: "Welk dier zie je op de foto? (testplaatje)", image: "https://picsum.photos/seed/dier/500/300", options: ["Hond", "Kat", "Paard", "Konijn"], correct: 0 },
     { q: "Welk landschap is dit? (testplaatje)", image: "https://picsum.photos/seed/berg/500/300", options: ["Strand", "Berg", "Woestijn", "Bos"], correct: 1 },
     { q: "Welk gebouw staat op de foto? (testplaatje)", image: "https://picsum.photos/seed/gebouw/500/300", options: ["Kerk", "Kasteel", "Wolkenkrabber", "Molen"], correct: 2 },
@@ -549,9 +550,10 @@ window.selectQuestion = function(ri, qi) {
   document.getElementById('active-q-roundlabel').textContent = `Vraag ${qi+1}/${rounds[ri].questions.length} van de ${rounds[ri].title}`;
 
   // bouw de weergave voor de quizmaster
+  const useBlur = round.blur && q.image;
   let qHtml = '';
   if (q.image) {
-    qHtml += `<img src="${q.image}" class="q-image" alt="vraagafbeelding" />`;
+    qHtml += `<img src="${q.image}" class="q-image${useBlur ? ' blurred' : ''}" id="qm-image" data-blur="${useBlur ? '1' : '0'}" alt="vraagafbeelding" />`;
   }
   qHtml += `<div>${q.q}</div>`;
   if (isMC && q.options) {
@@ -582,7 +584,8 @@ window.selectQuestion = function(ri, qi) {
       total: rounds[ri].questions.length,
       type: round.type || 'open',
       options: (isMC && q.options) ? q.options : null,
-      image: q.image || null
+      image: q.image || null,
+      blur: useBlur ? true : false
     },
     showAnswer: false,
     showScoreboard: false,
@@ -596,6 +599,11 @@ window.toggleAnswer = function() {
   showingAnswer = !showingAnswer;
   document.getElementById('active-q-answer').classList.toggle('show', showingAnswer);
   document.getElementById('show-answer-btn').textContent = showingAnswer ? 'Verberg antwoord' : 'Toon antwoord';
+  // blur van de afbeelding aan/uit op basis van het tonen van het antwoord
+  const qmImg = document.getElementById('qm-image');
+  if (qmImg && qmImg.dataset.blur === '1') {
+    qmImg.classList.toggle('blurred', !showingAnswer);
+  }
   update(ref(db, `rooms/${ROOM}/state`), { showAnswer: showingAnswer });
 };
 
