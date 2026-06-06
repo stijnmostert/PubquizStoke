@@ -104,6 +104,7 @@
   .btn-row { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
   .btn-row .btn-sm { flex: 1; min-width: 90px; text-align: center; }
   .btn-sm { padding: 8px 14px; font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; border-radius: 8px; cursor: pointer; transition: all 0.15s; border: 1px solid var(--border2); background: transparent; color: var(--cream); }
+  .btn-sm:disabled { opacity: 0.35; cursor: not-allowed; }
   .btn-sm:hover { border-color: var(--gold); color: var(--gold); }
   .btn-sm.gold { background: var(--gold); color: #FFFEFD; border-color: var(--gold); }
   .btn-sm.gold:hover { background: var(--gold2); }
@@ -180,6 +181,8 @@
   /* Uitslag pop-up */
   #results-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 1.5rem; }
   #results-overlay.show { display: flex; }
+  #scoreboard-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; align-items: center; justify-content: center; padding: 1.5rem; }
+  #scoreboard-overlay.show { display: flex; }
   .results-list { display: flex; flex-direction: column; gap: 8px; }
   .results-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; background: var(--bg3); border: 1px solid var(--border); }
   .results-row.winner { border-color: var(--gold); background: rgba(78,120,168,0.18); }
@@ -277,7 +280,7 @@
       <div class="panel score-panel">
         <div class="panel-head">
           <span class="panel-title">Scorebord</span>
-          <button class="btn-sm gold" onclick="broadcastScoreboard()" style="padding:4px 10px;font-size:11px;">📺 Toon</button>
+          <button class="btn-sm gold" id="toon-sb-btn" onclick="broadcastScoreboard()" style="padding:4px 10px;font-size:11px;">📺 Toon</button>
         </div>
         <div class="panel-body">
           <div id="score-hidden-note" class="empty-state">Ranking verborgen<br>Klik op 📺 Toon</div>
@@ -326,6 +329,20 @@
   </div>
 </div>
 
+<!-- Groot scorebord-overlay -->
+<div id="scoreboard-overlay">
+  <div class="rules-modal">
+    <div class="rules-head">
+      <span class="rules-title">🏆 Scorebord</span>
+      <button class="rules-close" onclick="hideScoreboard()">✕</button>
+    </div>
+    <div class="rules-body" id="scoreboard-overlay-body"></div>
+    <div style="padding: 14px 22px 18px; text-align:center;">
+      <button class="btn-sm" onclick="hideScoreboard()" style="padding:10px 32px; font-size:15px;">🙈 Verberg</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, onValue, update, push, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -349,11 +366,11 @@ const rounds = [
     { q: "Hoeveel ringen zijn er op de Olympische vlag?", options: ["4", "5", "6", "7"], correct: 1 },
     { q: "Welk land won het vaakst het wereldkampioenschap voetbal?", options: ["Brazilië", "Argentinië", "Duitsland", "Italië"], correct: 0 },
     { q: "Uit hoeveel spelers bestaat een rugbyteam?", options: ["10 spelers", "12 spelers", "15 spelers", "16 spelers"], correct: 2 },
-    { q: "Wie werd kampioen van de Eredivisie in het seizoen 2023/2024?", options: ["PSV Eindhoven", "Feyenoord", "Ajax", "AZ Alkmaar"], correct: 0 },
+    { q: "Wie werd kampioen van de Eredivisie in het seizoen 2025/2026?", options: ["PSV Eindhoven", "Feyenoord", "Ajax", "AZ Alkmaar"], correct: 0 },
     { q: "Welke sport wordt gespeeld in de Super Bowl?", options: ["Basketbal", "American football", "Voetbal", "Hockey"], correct: 1 }
   ]},
-  { title: "De Connectie", emoji: "🧩", type: "connection", questions: [
-    { words: ["Ferrari", "Lamborghini", "Maserati", "Alfa Romeo"], a: "Italiaanse automerken" },
+  { title: "Connectie", emoji: "🧩", type: "connection", questions: [
+    { words: ["Alarm", "Sirene", "Flits", "Blauw"], a: "Politie" },
     { words: ["7", "11", "13", "17"], a: "Priemgetallen" },
     { words: ["Januari", "Maart", "Mei", "Juli"], a: "Maanden met 31 dagen" },
     { words: ["FC Barcelona", "Real Madrid", "Atlético Madrid", "Sevilla FC"], a: "Spaanse voetbalclubs" },
@@ -454,6 +471,7 @@ function listenPlayers() {
     renderPlayers();
     renderScoreboard();
     renderAwayWarnings();
+    updateGating();
     document.getElementById('player-count').textContent = `${Object.keys(players).length} spelers online`;
   });
 }
@@ -638,6 +656,7 @@ window.selectQuestion = function(ri, qi) {
   });
 
   renderQuestions();
+  updateGating();
 };
 
 window.toggleAnswer = function() {
@@ -650,6 +669,7 @@ window.toggleAnswer = function() {
     qmImg.classList.toggle('blurred', !showingAnswer);
   }
   update(ref(db, `rooms/${ROOM}/state`), { showAnswer: showingAnswer });
+  updateGating();
 };
 
 window.markDoneAndNext = function() {
@@ -743,23 +763,48 @@ window.goPrev = function() {
 function renderAnswers() {
   const el = document.getElementById('answers-list');
   const entries = Object.entries(currentAnswers);
-  if (!entries.length) { el.innerHTML = '<div class="no-answers">Nog geen antwoorden</div>'; return; }
-  el.innerHTML = entries.map(([playerId, data]) => {
-    const name = players[playerId]?.name || playerId;
-    const correct = awardedAnswers.has(playerId);
-    const wrong = wrongAnswers.has(playerId);
-    const visible = revealedAnswers.has(playerId);
-    const answerHtml = visible
-      ? `<span class="answer-text">"${data.answer}"</span>`
-      : `<span class="answer-text hidden-answer">••••••••</span>`;
-    return `<div class="answer-item">
-      <span class="player-name">${name}</span>
-      ${answerHtml}
-      <button class="eye-btn" onclick="toggleAnswerVisible('${playerId}')" title="${visible ? 'Verberg' : 'Toon'} antwoord">${visible ? '🙈' : '👁️'}</button>
-      <button class="award-btn ${correct ? 'awarded' : ''}" onclick="markCorrect('${playerId}')">${correct ? '✓ Punt' : '+ Punt'}</button>
-      <button class="wrong-btn ${wrong ? 'marked' : ''}" onclick="markWrong('${playerId}')">${wrong ? '✗ Fout' : 'Fout'}</button>
-    </div>`;
-  }).join('');
+  if (!entries.length) {
+    el.innerHTML = '<div class="no-answers">Nog geen antwoorden</div>';
+  } else {
+    el.innerHTML = entries.map(([playerId, data]) => {
+      const name = players[playerId]?.name || playerId;
+      const correct = awardedAnswers.has(playerId);
+      const wrong = wrongAnswers.has(playerId);
+      const visible = revealedAnswers.has(playerId);
+      const answerHtml = visible
+        ? `<span class="answer-text">"${data.answer}"</span>`
+        : `<span class="answer-text hidden-answer">••••••••</span>`;
+      return `<div class="answer-item">
+        <span class="player-name">${name}</span>
+        ${answerHtml}
+        <button class="eye-btn" onclick="toggleAnswerVisible('${playerId}')" title="${visible ? 'Verberg' : 'Toon'} antwoord">${visible ? '🙈' : '👁️'}</button>
+        <button class="award-btn ${correct ? 'awarded' : ''}" onclick="markCorrect('${playerId}')">${correct ? '✓ Punt' : '+ Punt'}</button>
+        <button class="wrong-btn ${wrong ? 'marked' : ''}" onclick="markWrong('${playerId}')">${wrong ? '✗ Fout' : 'Fout'}</button>
+      </div>`;
+    }).join('');
+  }
+  updateGating();
+}
+
+// blokkeer 'Toon antwoord' tot iedereen online geantwoord heeft,
+// en 'Volgende vraag' tot iedere ingezonden antwoord een punt/fout heeft gekregen
+function updateGating() {
+  const toonBtn = document.getElementById('show-answer-btn');
+  const nextBtn = document.getElementById('next-q-btn');
+  if (!toonBtn || !nextBtn) return;
+
+  // geen actieve vraag (opwarm-/pauze-/eindscherm) → niets blokkeren
+  if (!activeQKey) { toonBtn.disabled = false; nextBtn.disabled = false; return; }
+
+  const online = Object.keys(players);
+  const answeredIds = Object.keys(currentAnswers);
+  const everyoneAnswered = online.every(id => currentAnswers[id] !== undefined);
+  const everyoneGraded = answeredIds.length > 0
+    ? answeredIds.every(id => awardedAnswers.has(id) || wrongAnswers.has(id))
+    : online.length === 0;
+
+  toonBtn.disabled = !(showingAnswer || everyoneAnswered);
+  nextBtn.disabled = !everyoneGraded;
 }
 
 window.toggleAnswerVisible = function(playerId) {
@@ -811,29 +856,57 @@ function renderScoreboard() {
   const el = document.getElementById('score-list');
   const entries = Object.entries(players).map(([k, v]) => ({ id: k, name: v.name, score: v.score || 0 }))
     .sort((a, b) => b.score - a.score);
-  if (!entries.length) { el.innerHTML = '<div class="empty-state">Wachten op spelers...</div>'; return; }
-  const max = entries[0].score || 1;
-  el.innerHTML = entries.map((p, i) => `
-    <div class="score-item ${i === 0 ? 'top' : ''}">
-      <div class="score-rank">${i === 0 ? '🏆' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1}</div>
-      <div style="flex:1;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span class="score-name">${p.name}</span>
-          <span class="score-pts">${p.score}</span>
+  if (!entries.length) {
+    el.innerHTML = '<div class="empty-state">Wachten op spelers...</div>';
+  } else {
+    const max = entries[0].score || 1;
+    el.innerHTML = entries.map((p, i) => `
+      <div class="score-item ${i === 0 ? 'top' : ''}">
+        <div class="score-rank">${i === 0 ? '🏆' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1}</div>
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span class="score-name">${p.name}</span>
+            <span class="score-pts">${p.score}</span>
+          </div>
+          <div class="score-bar"><div class="score-bar-fill" style="width:${Math.round(p.score/max*100)}%"></div></div>
         </div>
-        <div class="score-bar"><div class="score-bar-fill" style="width:${Math.round(p.score/max*100)}%"></div></div>
-      </div>
-    </div>`).join('');
+      </div>`).join('');
+  }
+  // groot overlay (top 10) bijwerken
+  const ovEl = document.getElementById('scoreboard-overlay-body');
+  if (ovEl) {
+    const top = entries.slice(0, 10);
+    const medal = (i) => i === 0 ? '🏆' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+    ovEl.innerHTML = top.length
+      ? '<div class="results-list">' + top.map((p, i) =>
+          `<div class="results-row${i === 0 ? ' winner' : ''}"><span class="results-rank">${medal(i)}</span><span class="results-name">${p.name}</span><span class="results-pts">${p.score} ${p.score === 1 ? 'punt' : 'punten'}</span></div>`
+        ).join('') + '</div>'
+      : '<p style="text-align:center;color:var(--muted);">Nog geen spelers.</p>';
+  }
 }
 
 let scoreboardRevealed = false;
 
 window.broadcastScoreboard = function() {
-  scoreboardRevealed = !scoreboardRevealed;
-  document.getElementById('score-list').style.display = scoreboardRevealed ? '' : 'none';
-  document.getElementById('score-hidden-note').style.display = scoreboardRevealed ? 'none' : '';
-  // toon/verberg ook bij de spelers
-  update(ref(db, `rooms/${ROOM}/state`), { showScoreboard: scoreboardRevealed });
+  if (scoreboardRevealed) { hideScoreboard(); return; }
+  scoreboardRevealed = true;
+  renderScoreboard();
+  document.getElementById('scoreboard-overlay').classList.add('show');
+  document.getElementById('score-list').style.display = '';
+  document.getElementById('score-hidden-note').style.display = 'none';
+  const btn = document.getElementById('toon-sb-btn');
+  if (btn) btn.textContent = '🙈 Verberg';
+  update(ref(db, `rooms/${ROOM}/state`), { showScoreboard: true });
+};
+
+window.hideScoreboard = function() {
+  scoreboardRevealed = false;
+  document.getElementById('scoreboard-overlay').classList.remove('show');
+  document.getElementById('score-list').style.display = 'none';
+  document.getElementById('score-hidden-note').style.display = '';
+  const btn = document.getElementById('toon-sb-btn');
+  if (btn) btn.textContent = '📺 Toon';
+  update(ref(db, `rooms/${ROOM}/state`), { showScoreboard: false });
 };
 
 window.openRules = function() {
