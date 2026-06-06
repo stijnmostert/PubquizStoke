@@ -408,14 +408,9 @@ function showQuestion(q) {
   const connectWrap = document.getElementById('connect-words');
   prompt.style.display = 'block';
 
-  // connectie-woorden tonen indien aanwezig
-  if (isConnection) {
-    connectWrap.style.display = 'grid';
-    connectWrap.innerHTML = q.words.map(w => `<div class="connect-word">${w}</div>`).join('');
-  } else {
-    connectWrap.style.display = 'none';
-    connectWrap.innerHTML = '';
-  }
+  // connectie-woorden NIET tonen bij spelers (alleen quizmaster leest ze voor)
+  connectWrap.style.display = 'none';
+  connectWrap.innerHTML = '';
 
   if (isMC) {
     // multiple choice: knoppen tonen, tekstveld + insturen-knop verbergen
