@@ -49,6 +49,7 @@
   .mc-btn:hover { border-color: var(--gold); }
   .mc-btn.selected { background: var(--gold); border-color: var(--gold); color: #FFFFFF; font-weight: 600; }
   .mc-btn .mc-letter { font-weight: 700; margin-right: 8px; }
+  .tf-btn { text-align: center; font-weight: 600; }
   textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border2); border-radius: 9px; padding: 12px 14px; color: var(--cream); font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none; resize: none; height: 100px; margin-bottom: 1rem; }
   textarea:focus { border-color: var(--gold); }
   textarea::placeholder { color: var(--muted); }
@@ -380,6 +381,7 @@ function showQuestion(q) {
 
   const isMC = q.type === 'mc' && q.options;
   const isConnection = q.type === 'connection' && q.words;
+  const isTF = q.type === 'truefalse';
   const mcWrap = document.getElementById('mc-buttons');
   const textarea = document.getElementById('answer-input');
   const submitBtn = document.getElementById('submit-btn');
@@ -406,6 +408,15 @@ function showQuestion(q) {
     mcWrap.innerHTML = q.options.map((opt, oi) =>
       `<button class="mc-btn" onclick="submitMC(${oi}, '${opt.replace(/'/g, "\\'")}')"><span class="mc-letter">${letters[oi]}</span>${opt}</button>`
     ).join('');
+  } else if (isTF) {
+    // waar / niet waar: twee knoppen
+    prompt.textContent = 'Waar of niet waar? 👇';
+    textarea.style.display = 'none';
+    submitBtn.style.display = 'none';
+    mcWrap.style.display = 'flex';
+    mcWrap.innerHTML =
+      `<button class="mc-btn tf-btn" onclick="submitTF('Waar')">✅ Waar</button>` +
+      `<button class="mc-btn tf-btn" onclick="submitTF('Niet waar')">❌ Niet waar</button>`;
   } else {
     // open vraag (incl. connectie): tekstveld + insturen-knop
     prompt.textContent = isConnection ? 'Wat is de connectie? Typ je antwoord 👇' : 'Typ hieronder je antwoord 👇';
@@ -467,6 +478,19 @@ window.submitMC = function(index, optionText) {
   set(ref(db, `rooms/${ROOM}/answers/${playerId}`), { answer, playerName, submittedAt: Date.now() });
 
   // verberg de keuzeknoppen en de prompt, toon alleen de bevestiging
+  document.getElementById('mc-buttons').style.display = 'none';
+  document.getElementById('q-prompt').style.display = 'none';
+
+  document.getElementById('submitted-box').classList.add('show');
+  document.getElementById('submitted-answer-text').textContent = `Jouw antwoord: ${answer}`;
+};
+
+window.submitTF = function(answer) {
+  if (hasSubmitted) return;
+  hasSubmitted = true;
+  set(ref(db, `rooms/${ROOM}/answers/${playerId}`), { answer, playerName, submittedAt: Date.now() });
+
+  // verberg de knoppen en de prompt, toon alleen de bevestiging
   document.getElementById('mc-buttons').style.display = 'none';
   document.getElementById('q-prompt').style.display = 'none';
 
