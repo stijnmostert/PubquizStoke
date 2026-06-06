@@ -87,7 +87,7 @@
     <div class="logo"><span>QUIZ</span>CITY '26 🍺</div>
     <div class="sub">Doe mee met de quiz!</div>
     <label>Jouw naam</label>
-    <input type="text" id="player-name" placeholder="bijv. Jan..." maxlength="20" onkeydown="if(event.key==='Enter') joinQuiz()" />
+    <input type="text" id="player-name" placeholder="bijv. Jan (met hoofdletter)" maxlength="20" onkeydown="if(event.key==='Enter') joinQuiz()" />
     <label>Wachtwoord</label>
     <input type="password" id="password-input" placeholder="Wachtwoord..." onkeydown="if(event.key==='Enter') joinQuiz()" />
     <div id="login-error" style="display:none; color:var(--red); font-size:13px; margin-bottom:0.75rem;">Onjuist wachtwoord, probeer opnieuw.</div>
@@ -182,6 +182,12 @@ window.joinQuiz = function() {
   playerName = document.getElementById('player-name').value.trim();
   const password = document.getElementById('password-input').value;
   if (!playerName) { alert('Vul je naam in!'); return; }
+
+  // naam moet met een hoofdletter beginnen
+  if (!/^[A-ZÀ-ÖØ-Þ]/.test(playerName)) {
+    alert('Je naam moet met een hoofdletter beginnen!');
+    return;
+  }
 
   // wachtwoordcontrole
   if (password !== 'quizcity123!') {
