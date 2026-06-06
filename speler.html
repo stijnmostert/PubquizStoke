@@ -102,7 +102,7 @@
   </div>
 
   <!-- PAUZE -->
-  <div id="pause-screen" style="display:none;">
+  <div id="pause-screen" style="display:none; text-align:center;">
     <div class="waiting-icon">🍻</div>
     <div class="waiting-title">PAUZE 🎉</div>
     <div class="waiting-sub">Even bijkomen! De quiz gaat zo verder</div>
@@ -189,8 +189,6 @@ window.joinQuiz = function() {
   document.getElementById('join-screen').style.display = 'none';
   document.getElementById('waiting-screen').style.display = 'block';
   document.getElementById('name-badge').textContent = playerName;
-  document.getElementById('room-info').style.display = 'block';
-  document.getElementById('room-show').textContent = ROOM;
 
   listenState();
   listenFeedback();
