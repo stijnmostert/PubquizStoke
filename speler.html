@@ -87,8 +87,9 @@
     <div class="sub">Doe mee met de quiz!</div>
     <label>Jouw naam</label>
     <input type="text" id="player-name" placeholder="bijv. Jan..." maxlength="20" onkeydown="if(event.key==='Enter') joinQuiz()" />
-    <label>Kamer naam</label>
-    <input type="text" id="room-input" placeholder="pubquiz" value="pubquiz" />
+    <label>Wachtwoord</label>
+    <input type="password" id="password-input" placeholder="Wachtwoord..." onkeydown="if(event.key==='Enter') joinQuiz()" />
+    <div id="login-error" style="display:none; color:var(--red); font-size:13px; margin-bottom:0.75rem;">Onjuist wachtwoord, probeer opnieuw.</div>
     <button class="btn btn-gold" onclick="joinQuiz()">Meedoen →</button>
     <p class="hint">© 2026 — Dit evenement is mede mogelijk gemaakt door<br>Stijn Mostert</p>
   </div>
@@ -178,9 +179,17 @@ db = getDatabase(app);
 
 window.joinQuiz = function() {
   playerName = document.getElementById('player-name').value.trim();
-  ROOM = document.getElementById('room-input').value.trim() || 'pubquiz';
+  const password = document.getElementById('password-input').value;
   if (!playerName) { alert('Vul je naam in!'); return; }
 
+  // wachtwoordcontrole
+  if (password !== 'quizcity123!') {
+    document.getElementById('login-error').style.display = 'block';
+    return;
+  }
+  document.getElementById('login-error').style.display = 'none';
+
+  ROOM = 'pubquiz';
   playerId = 'player_' + Math.random().toString(36).substr(2, 8);
   joinTime = Date.now();
 
