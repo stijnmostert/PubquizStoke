@@ -423,6 +423,12 @@ window.startApp = function() {
   // init room
   set(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false, paused: false });
 
+  // bij (her)laden van de quizmaster: alle spelers en oude antwoorden wissen
+  remove(ref(db, `rooms/${ROOM}/players`));
+  remove(ref(db, `rooms/${ROOM}/answers`));
+  remove(ref(db, `rooms/${ROOM}/feedback`));
+  remove(ref(db, `rooms/${ROOM}/agreements`));
+
   document.getElementById('setup-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
 
