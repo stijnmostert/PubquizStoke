@@ -23,6 +23,9 @@
   input[type=text], input[type=password] { width: 100%; background: var(--bg3); border: 1px solid var(--border2); border-radius: 9px; padding: 12px 14px; color: var(--cream); font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 1rem; }
   input[type=text]:focus, input[type=password]:focus { border-color: var(--gold); }
   input[type=text]::placeholder, input[type=password]::placeholder { color: var(--muted); }
+  .pw-wrap { position: relative; }
+  .pw-wrap input { padding-right: 44px; }
+  .pw-eye { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); margin-top: -8px; background: transparent; border: none; cursor: pointer; font-size: 18px; padding: 4px; line-height: 1; }
   .btn { width: 100%; padding: 13px; font-size: 15px; font-weight: 600; font-family: 'DM Sans', sans-serif; border-radius: 9px; border: none; cursor: pointer; }
   .btn-gold { background: var(--gold); color: #FFFEFD; }
   .btn-gold:hover { background: var(--gold2); }
@@ -89,7 +92,10 @@
     <label>Jouw naam</label>
     <input type="text" id="player-name" placeholder="bijv. Jan..." maxlength="20" onkeydown="if(event.key==='Enter') joinQuiz()" />
     <label>Wachtwoord</label>
-    <input type="password" id="password-input" placeholder="Wachtwoord..." onkeydown="if(event.key==='Enter') joinQuiz()" />
+    <div class="pw-wrap">
+      <input type="password" id="password-input" placeholder="Wachtwoord..." onkeydown="if(event.key==='Enter') joinQuiz()" />
+      <button type="button" class="pw-eye" id="pw-eye" onclick="togglePassword()" title="Wachtwoord tonen">👁️</button>
+    </div>
     <div id="login-error" style="display:none; color:var(--red); font-size:13px; margin-bottom:0.75rem;">Onjuist wachtwoord, probeer opnieuw.</div>
     <button class="btn btn-gold" onclick="joinQuiz()">Meedoen →</button>
     <p class="hint">© 2026 — Dit evenement is mede mogelijk gemaakt door<br>Stijn Mostert</p>
@@ -177,6 +183,13 @@ let agreedRulesAt = 0;
 
 const app = initializeApp(FIREBASE_CONFIG);
 db = getDatabase(app);
+
+window.togglePassword = function() {
+  const inp = document.getElementById('password-input');
+  const eye = document.getElementById('pw-eye');
+  if (inp.type === 'password') { inp.type = 'text'; eye.textContent = '🙈'; }
+  else { inp.type = 'password'; eye.textContent = '👁️'; }
+};
 
 window.joinQuiz = function() {
   playerName = document.getElementById('player-name').value.trim();
