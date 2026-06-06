@@ -220,7 +220,6 @@
     <div class="topbar">
       <div class="topbar-left">
         <h1><span>QUIZ</span>CITY '26 🍺</h1>
-        <div class="room-badge"><span class="status-dot"></span>Kamer: <b id="room-label"></b></div>
       </div>
       <div style="display:flex; align-items:center; gap:12px;">
         <span style="font-size:12px; color:var(--muted);" id="player-count">0 spelers online</span>
@@ -426,7 +425,6 @@ window.startApp = function() {
 
   document.getElementById('setup-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
-  document.getElementById('room-label').textContent = ROOM;
 
   listenPlayers();
   listenAnswers();
