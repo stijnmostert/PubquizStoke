@@ -292,20 +292,27 @@
 </div>
 
 <!-- Regels pop-up -->
-<div id="rules-overlay" onclick="closeRules(event)">
-  <div class="rules-modal" onclick="event.stopPropagation()">
+<div id="rules-overlay">
+  <div class="rules-modal">
     <div class="rules-head">
       <span class="rules-title">📜 Spelregels</span>
       <button class="rules-close" onclick="closeRules()">✕</button>
     </div>
     <div class="rules-body" id="rules-body">
-      <p><strong>Testregel 1 —</strong> Dit is een voorbeeldregel. Pas deze later aan met je eigen regels.</p>
-      <p><strong>Testregel 2 —</strong> Elke ronde bestaat uit 5 vragen.</p>
-      <p><strong>Testregel 3 —</strong> Een goed antwoord levert 1 punt op.</p>
-      <p><strong>Testregel 4 —</strong> Spieken op je telefoon mag natuurlijk niet 😉.</p>
-      <p><strong>Testregel 5 —</strong> Het team met de meeste punten aan het eind wint.</p>
+      <p>🍻 Als je een vraag fout hebt moet je 3 slokken nemen</p>
+      <p>🍻 Als 7 van de 10 de vraag goed hebben neemt de quizmaster (Stinna) 3 slokken</p>
+      <p>🍻 Je mag niet naar een ander tabblad of een andere app, anders 5 slokken</p>
+      <p>🍻 Zeuren over een antwoord is 3 slokken</p>
+      <p>🍻 Tijdens het spel is er een pauze</p>
+      <p>🍻 Een foutloze ronde is 5 slokken voor de quizmaster (Stinna)</p>
+      <p>🍻 🥇 1e plaats geeft een shotgun weg</p>
+      <p>🍻 🥈 2e plaats geeft 4 slokken weg</p>
+      <p>🍻 🥉 3e plaats geeft 2 slokken weg</p>
     </div>
     <div class="rules-foot" id="rules-foot">✅ <span id="agree-count">0</span> van de <span id="agree-total">0</span> spelers akkoord</div>
+    <div style="padding: 14px 22px 18px; text-align:center;">
+      <button class="btn-sm green" onclick="closeRules()" style="padding:10px 32px; font-size:15px;">Oké</button>
+    </div>
   </div>
 </div>
 
