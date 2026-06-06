@@ -58,6 +58,8 @@
   textarea::placeholder { color: var(--muted); }
   .submitted-box { background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px; padding: 1rem; text-align: center; display: none; }
   .submitted-box.show { display: block; }
+  .btn-redo { margin-top: 14px; background: transparent; border: 1px solid var(--border2); color: var(--muted); border-radius: 8px; padding: 8px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+  .btn-redo:hover { border-color: var(--gold); color: var(--cream); }
   .submitted-text { font-size: 14px; color: var(--cream); font-weight: 500; }
   .submitted-answer { font-size: 13px; color: var(--muted); margin-top: 4px; font-style: italic; }
   .feedback-result { font-size: 40px; margin-top: 12px; display: none; }
@@ -147,6 +149,7 @@
       <div class="submitted-answer" id="submitted-answer-text"></div>
       <div class="feedback-result" id="feedback-result"></div>
       <div class="feedback-rank" id="feedback-rank"></div>
+      <button class="btn-redo" id="redo-btn" onclick="redoAnswer()">↩️ Wijzig antwoord</button>
     </div>
   </div>
 
@@ -161,7 +164,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 // ⚠️ VERVANG DEZE WAARDEN MET JOUW FIREBASE GEGEVENS
 const FIREBASE_CONFIG = {
@@ -176,6 +179,7 @@ const FIREBASE_CONFIG = {
 
 let db, ROOM, playerId, playerName;
 let currentQKey = null;
+let currentQ = null;
 let hasSubmitted = false;
 let joinTime = 0;
 let latestRulesAt = 0;
@@ -380,6 +384,7 @@ function showPause() {
 }
 
 function showQuestion(q) {
+  currentQ = q;
   document.getElementById('waiting-screen').style.display = 'none';
   document.getElementById('scoreboard-screen').style.display = 'none';
   document.getElementById('pause-screen').style.display = 'none';
@@ -510,6 +515,16 @@ window.submitTF = function(answer) {
 
   document.getElementById('submitted-box').classList.add('show');
   document.getElementById('submitted-answer-text').textContent = `Jouw antwoord: ${answer}`;
+};
+
+window.redoAnswer = function() {
+  if (!currentQ) return;
+  // verwijder het antwoord en eventuele feedback (verdwijnt ook bij de quizmaster)
+  remove(ref(db, `rooms/${ROOM}/answers/${playerId}`));
+  set(ref(db, `rooms/${ROOM}/feedback/${playerId}`), null);
+  hasSubmitted = false;
+  // terug naar het antwoordscherm van de huidige vraag
+  showQuestion(currentQ);
 };
 </script>
 </body>
