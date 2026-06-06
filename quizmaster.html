@@ -366,12 +366,12 @@ const rounds = [
     { q: "Wie was de beroemde leider van de Romeinen?", options: ["Napoleon", "Julius Caesar", "Karel de Grote", "Alexander de Grote"], correct: 1 },
     { q: "Welke gebeurtenis begon in 1789?", options: ["De Industriële Revolutie", "De Franse Revolutie", "De Tweede Wereldoorlog", "De Reformatie"], correct: 1 }
   ]},
-  { title: "Film", emoji: "🎬", type: "mc", questions: [
-    { q: "Welke acteur speelt Jack in Titanic?", options: ["Brad Pitt", "Leonardo DiCaprio", "Tom Cruise", "Johnny Depp"], correct: 1 },
-    { q: "In welk fictief land speelt Black Panther zich af?", options: ["Zamunda", "Wakanda", "Genovia", "Latveria"], correct: 1 },
-    { q: "Hoeveel films telt de originele Star Wars-trilogie?", options: ["2", "3", "4", "5"], correct: 1 },
-    { q: "Welke animatiestudio maakte Toy Story?", options: ["DreamWorks", "Pixar", "Disney", "Illumination"], correct: 1 },
-    { q: "Wie regisseerde de film Inception?", options: ["Steven Spielberg", "Christopher Nolan", "James Cameron", "Quentin Tarantino"], correct: 1 }
+  { title: "Waar of Niet Waar", emoji: "🤔", type: "truefalse", questions: [
+    { q: "2026 is een schrikkeljaar.", correct: false },
+    { q: "Een groep kraaien wordt ook wel een moord genoemd.", correct: true },
+    { q: "Alle landen van de Europese Unie gebruiken de euro als munt.", correct: false, note: "bijv. Zweden en Denemarken doen dit niet" },
+    { q: "De Grote Muur van China is vanaf de maan zichtbaar.", correct: false },
+    { q: "Een octopus heeft geel bloed.", correct: false, note: "het bloed is blauw" }
   ]}
 ];
 
@@ -382,7 +382,7 @@ const readyMessages = [
   "Denken jullie dat jullie gaan winnen of wordt het spannend?!?! 👀",          // Sport
   "Hebben jullie er een beetje zin maatjess🫵",                                 // De Connectie
   "Zit de kennis er al in of komt die straks pas?!?! 😉",                       // Geschiedenis
-  "Gaan we voor de winst of gewoon voor de gezelligheid?!?! 🍻"                 // Film
+  "Gaan we voor de winst of gewoon voor de gezelligheid?!?! 🍻"                 // Waar of Niet Waar
 ];
 
 let db, roomRef, ROOM;
@@ -582,6 +582,7 @@ window.selectQuestion = function(ri, qi) {
   const round = rounds[ri];
   const isMC = round.type === 'mc';
   const isConnection = round.type === 'connection';
+  const isTF = round.type === 'truefalse';
   const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
   document.getElementById('active-q-roundlabel').textContent = `Vraag ${qi+1}/${rounds[ri].questions.length} van de ${rounds[ri].title}`;
@@ -607,9 +608,10 @@ window.selectQuestion = function(ri, qi) {
   document.getElementById('active-q-text').style.color = 'var(--cream)';
 
   // juiste antwoord
-  const answerText = isMC && q.options
-    ? `${letters[q.correct]}. ${q.options[q.correct]}`
-    : q.a;
+  let answerText;
+  if (isMC && q.options) answerText = `${letters[q.correct]}. ${q.options[q.correct]}`;
+  else if (isTF) answerText = (q.correct ? 'Waar' : 'Niet waar') + (q.note ? ` (${q.note})` : '');
+  else answerText = q.a;
   document.getElementById('active-q-answer').textContent = `✓ Antwoord: ${answerText}`;
   document.getElementById('active-q-answer').classList.remove('show');
   document.getElementById('show-answer-btn').textContent = 'Toon antwoord';
