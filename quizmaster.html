@@ -332,25 +332,25 @@ import { getDatabase, ref, set, onValue, update, push, remove } from "https://ww
 
 const rounds = [
   { title: "Algemene Kennis", emoji: "🧠", type: "mc", questions: [
-    { q: "Hoeveel minuten zitten er in een etmaal?", options: ["1200", "1440", "1600", "2400"], correct: 1 },
-    { q: "Welk dier is het grootste ter wereld?", options: ["Olifant", "Blauwe vinvis", "Walvishaai", "Giraffe"], correct: 1 },
-    { q: "Hoeveel kleuren heeft een regenboog traditioneel?", options: ["5", "6", "7", "8"], correct: 2 },
-    { q: "Wat is de chemische afkorting voor goud?", options: ["Go", "Au", "Gd", "Ag"], correct: 1 },
-    { q: "Welke planeet staat het dichtst bij de zon?", options: ["Venus", "Mars", "Mercurius", "Aarde"], correct: 2 }
+    { q: "Wat is het grootste waddeneiland van Nederland?", options: ["Texel", "Vlieland", "Ameland", "Terschelling"], correct: 0 },
+    { q: "Welk jaar werd de slavernij afgeschaft in Nederland?", options: ["1789", "1806", "1848", "1863"], correct: 3 },
+    { q: "Welke alcoholische drank is het belangrijkste ingrediënt in een Piña Colada?", options: ["Rum", "Wodka", "Gin", "Whisky"], correct: 0 },
+    { q: "Waar staat EHBO voor?", options: ["Eerste Hulp Bij Ongevallen", "Eerste Hulp Bij Ongelukken", "Europese Hulp Bij Ongevallen", "Emergency Help Bij Ongelukken"], correct: 0 },
+    { q: "Hoeveel botten heeft een volwassen mens?", options: ["186", "206", "226", "246"], correct: 1 }
   ]},
   { title: "Aardrijkskunde & Topografie", emoji: "🗺️", type: "open", questions: [
-    { q: "Welke Europese hoofdstad ligt het verst naar het noorden?", a: "Reykjavik (IJsland)" },
-    { q: "Door hoeveel landen stroomt de rivier de Rijn?", a: "6 landen" },
-    { q: "Welke oceaan is de grootste ter wereld?", a: "De Grote Oceaan (Stille Oceaan)" },
-    { q: "Hoe heet de beroemde woestijn in Noord-Afrika?", a: "De Sahara" },
-    { q: "In welk land liggen de Galapagoseilanden?", a: "Ecuador" }
+    { q: "Vanuit welke Friese plaats vertrekt de boot naar Ameland?", a: "Holwerd" },
+    { q: "Uit hoeveel staten bestaat de Verenigde Staten?", a: "50" },
+    { q: "Wat is het grootste land van Zuid-Amerika?", a: "Brazilië" },
+    { q: "Wat is de hoofdstad van de provincie Overijssel?", a: "Zwolle" },
+    { q: "Wat is de langste rivier ter wereld?", a: "De Nijl" }
   ]},
-  { title: "Sport", emoji: "⚽", type: "open", questions: [
-    { q: "Welke club won de eerste UEFA Champions League (1992/93)?", a: "Marseille" },
-    { q: "Hoeveel spelers staan er per team op het veld bij basketbal?", a: "5" },
-    { q: "In welk jaar won Oranje het EK voetbal?", a: "1988" },
-    { q: "Welke sport wordt gespeeld in Wimbledon?", a: "Tennis" },
-    { q: "Wat is de maximale score die je in bowlen kunt halen?", a: "300 punten" }
+  { title: "Sport", emoji: "⚽", type: "mc", questions: [
+    { q: "Hoeveel ringen zijn er op de Olympische vlag?", options: ["4", "5", "6", "7"], correct: 1 },
+    { q: "Welk land won het vaakst het wereldkampioenschap voetbal?", options: ["Brazilië", "Argentinië", "Duitsland", "Italië"], correct: 0 },
+    { q: "Uit hoeveel spelers bestaat een rugbyteam?", options: ["10 spelers", "12 spelers", "15 spelers", "16 spelers"], correct: 2 },
+    { q: "Wie werd kampioen van de Eredivisie in het seizoen 2023/2024?", options: ["PSV Eindhoven", "Feyenoord", "Ajax", "AZ Alkmaar"], correct: 0 },
+    { q: "Welke sport wordt gespeeld in de Super Bowl?", options: ["Basketbal", "American football", "Voetbal", "Hockey"], correct: 1 }
   ]},
   { title: "De Connectie", emoji: "🧩", type: "connection", questions: [
     { words: ["Ferrari", "Lamborghini", "Maserati", "Alfa Romeo"], a: "Italiaanse automerken" },
@@ -359,12 +359,12 @@ const rounds = [
     { words: ["FC Barcelona", "Real Madrid", "Atlético Madrid", "Sevilla FC"], a: "Spaanse voetbalclubs" },
     { words: ["Sahara", "Gobi", "Namib", "Kalahari"], a: "Woestijnen" }
   ]},
-  { title: "Geschiedenis", emoji: "📜", type: "open", questions: [
-    { q: "In welk jaar viel de Berlijnse Muur?", a: "1989" },
-    { q: "Wie was de eerste president van de Verenigde Staten?", a: "George Washington" },
-    { q: "In welk jaar begon de Tweede Wereldoorlog?", a: "1939" },
-    { q: "Welk schip zonk in 1912 op zijn eerste reis?", a: "De Titanic" },
-    { q: "Welke Egyptische koningin had relaties met Julius Caesar en Marcus Antonius?", a: "Cleopatra" }
+  { title: "Geschiedenis", emoji: "📜", type: "mc", questions: [
+    { q: "Wie was de eerste president van de Verenigde Staten?", options: ["Abraham Lincoln", "George Washington", "Thomas Jefferson", "John Adams"], correct: 1 },
+    { q: "In welk jaar begon de Tweede Wereldoorlog?", options: ["1914", "1939", "1945", "1950"], correct: 1 },
+    { q: "Welke muur viel in 1989?", options: ["De Chinese Muur", "De Muur van Jericho", "De Berlijnse Muur", "De Muur van Rome"], correct: 2 },
+    { q: "Wie was de beroemde leider van de Romeinen?", options: ["Napoleon", "Julius Caesar", "Karel de Grote", "Alexander de Grote"], correct: 1 },
+    { q: "Welke gebeurtenis begon in 1789?", options: ["De Industriële Revolutie", "De Franse Revolutie", "De Tweede Wereldoorlog", "De Reformatie"], correct: 1 }
   ]},
   { title: "Film", emoji: "🎬", type: "mc", questions: [
     { q: "Welke acteur speelt Jack in Titanic?", options: ["Brad Pitt", "Leonardo DiCaprio", "Tom Cruise", "Johnny Depp"], correct: 1 },
