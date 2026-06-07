@@ -407,6 +407,7 @@ let currentRoundIdx = 0;
 let activeQKey = null;
 let pendingRound = null;
 let onPause = false;
+let quizStarted = false;
 let showingAnswer = false;
 let doneQuestions = new Set();
 let players = {};
@@ -542,6 +543,7 @@ window.selectRound = function(i) {
   pendingRound = i;
   activeQKey = null;
   onPause = false;
+  quizStarted = true;
   renderRoundTabs();
 
   // toon eerst het 'klaar voor?' scherm i.p.v. meteen de vraag
@@ -585,6 +587,7 @@ window.selectQuestion = function(ri, qi) {
   activeQKey = key;
   pendingRound = null;
   onPause = false;
+  quizStarted = true;
   showingAnswer = false;
   awardedAnswers = new Set();
   wrongAnswers = new Set();
@@ -675,6 +678,13 @@ window.toggleAnswer = function() {
 
 window.markDoneAndNext = function() {
   const mid = Math.floor(rounds.length / 2);
+
+  // allereerste klik bij de start: toon eerst de categorie-intro
+  if (!quizStarted) {
+    quizStarted = true;
+    selectRound(0);
+    return;
+  }
 
   // vanuit de pauze: ga naar de volgende ronde (icoon na de pauze)
   if (onPause) {
@@ -939,6 +949,7 @@ window.resetGame = function() {
   activeQKey = null;
   pendingRound = null;
   onPause = false;
+  quizStarted = false;
   showingAnswer = false;
   doneQuestions = new Set();
   players = {};
