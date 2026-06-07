@@ -552,9 +552,9 @@ window.selectRound = function(i) {
   document.getElementById('show-answer-btn').textContent = 'Toon antwoord';
   document.getElementById('answers-list').innerHTML = '<div class="no-answers">Nog geen antwoorden</div>';
 
-  // spelers terug naar wachtscherm en oude antwoorden wissen
+  // spelers het 'nieuwe categorie' scherm tonen en oude antwoorden wissen
   remove(ref(db, `rooms/${ROOM}/answers`));
-  update(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false, paused: false });
+  update(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false, paused: false, roundIntro: { emoji: rounds[i].emoji, title: rounds[i].title } });
 };
 
 window.showPause = function() {
@@ -573,7 +573,7 @@ window.showPause = function() {
 
   // spelers tonen het pauzescherm
   remove(ref(db, `rooms/${ROOM}/answers`));
-  update(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false, paused: true });
+  update(ref(db, `rooms/${ROOM}/state`), { activeQuestion: null, showAnswer: false, showScoreboard: false, paused: true, roundIntro: null });
 };
 
 function renderQuestions() {
@@ -652,7 +652,8 @@ window.selectQuestion = function(ri, qi) {
     },
     showAnswer: false,
     showScoreboard: false,
-    paused: false
+    paused: false,
+    roundIntro: null
   });
 
   renderQuestions();
