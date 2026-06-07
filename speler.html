@@ -4,7 +4,9 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>🍺 Pubquiz</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
   :root {
     --bg: #1E2C3C; --bg2: #25364a; --bg3: #2d4055;
@@ -81,6 +83,85 @@
   .hint { font-size: 11px; color: var(--muted); text-align: center; line-height: 1.5; margin-top: 1.5rem; }
   .agree-box { display: flex; align-items: center; gap: 12px; justify-content: center; margin-top: 1.5rem; padding: 16px; background: var(--bg3); border: 1px solid var(--border2); border-radius: 12px; cursor: pointer; font-size: 15px; color: var(--cream); }
   .agree-box input { width: 22px; height: 22px; cursor: pointer; flex-shrink: 0; }
+</style>
+<style>
+  /* ===== NIEUW DESIGN — premium quiz-lounge (speler) ===== */
+  :root {
+    --bg:#130f1e; --bg2:#1b1730; --bg3:#262040;
+    --gold:#f3b65c; --gold2:#ffcd86;
+    --cream:#f4efe6; --muted:#a09aba;
+    --border:rgba(255,255,255,0.09); --border2:rgba(243,182,92,0.40);
+    --green:#73e2ab; --red:#ff8f8f; --violet:#7d5cda;
+    --font-display:'Bricolage Grotesque', sans-serif;
+    --font-body:'Hanken Grotesk', sans-serif;
+  }
+  body {
+    font-family: var(--font-body);
+    background-color:#130f1e;
+    background-image:
+      radial-gradient(900px 520px at 8% -12%, rgba(243,182,92,0.14), transparent 60%),
+      radial-gradient(820px 640px at 108% 112%, rgba(125,92,218,0.24), transparent 55%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .card {
+    position:relative; z-index:1; max-width:440px;
+    background:linear-gradient(180deg, rgba(40,34,66,0.7), rgba(24,20,42,0.7));
+    backdrop-filter:blur(16px); border:1px solid var(--border); border-radius:24px;
+    box-shadow:0 36px 90px -36px rgba(0,0,0,0.8);
+    animation: cardin .5s ease both;
+  }
+  @keyframes cardin { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;} }
+
+  .logo { font-family:var(--font-display); font-weight:800; font-size:50px; letter-spacing:-0.02em; }
+  .logo span { color:var(--gold); }
+  .sub { color:var(--muted); }
+  label { color:var(--muted); }
+
+  input[type=text], input[type=password] { font-family:var(--font-body); background:rgba(0,0,0,0.28); border:1px solid var(--border); border-radius:12px; }
+  input[type=text]:focus, input[type=password]:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(243,182,92,0.16); }
+
+  .btn { font-family:var(--font-body); border-radius:14px; font-weight:700; }
+  .btn-gold { background:linear-gradient(180deg,var(--gold2),var(--gold)); color:#2a1c05; box-shadow:0 12px 26px -12px rgba(243,182,92,0.65); }
+  .btn-gold:hover { filter:brightness(1.05); background:linear-gradient(180deg,var(--gold2),var(--gold)); }
+
+  .waiting-title { font-family:var(--font-display); font-weight:800; font-size:30px; letter-spacing:-0.01em; }
+  .waiting-sub { color:var(--muted); }
+  .player-name-badge { background:rgba(243,182,92,0.12); border:1px solid var(--border2); border-radius:10px; color:var(--gold); }
+
+  .q-label { color:var(--gold); }
+  .q-prompt { color:var(--muted); }
+
+  #mc-buttons { gap:12px; }
+  .mc-btn { font-family:var(--font-body); background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:14px; color:var(--cream); font-weight:500; transition:transform .12s ease, border-color .2s, background .2s; }
+  .mc-btn:hover { border-color:var(--gold); background:rgba(243,182,92,0.08); transform:translateY(-1px); }
+  .mc-btn.selected { background:linear-gradient(180deg,var(--gold2),var(--gold)); border-color:var(--gold); color:#2a1c05; font-weight:700; }
+  .mc-btn .mc-letter { color:var(--gold); font-weight:800; }
+  .mc-btn.selected .mc-letter { color:#2a1c05; }
+  .tf-btn { text-align:center; font-weight:700; }
+
+  .connect-word { font-family:var(--font-display); font-weight:700; background:rgba(255,255,255,0.04); border:1px solid var(--border2); border-radius:14px; }
+
+  textarea { font-family:var(--font-body); background:rgba(0,0,0,0.28); border:1px solid var(--border); border-radius:12px; }
+  textarea:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(243,182,92,0.16); }
+
+  .submitted-box { background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:14px; }
+  .btn-redo { font-family:var(--font-body); border:1px solid var(--border); border-radius:10px; }
+  .btn-redo:hover { border-color:var(--gold); color:var(--cream); background:rgba(243,182,92,0.08); }
+  .feedback-rank { color:var(--cream); }
+
+  .sb-title { font-family:var(--font-display); font-weight:800; }
+  .sb-title span { color:var(--gold); }
+  .sb-item { background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:12px; }
+  .sb-item.me { border-color:var(--gold); background:rgba(243,182,92,0.12); }
+  .sb-pts { font-family:var(--font-display); color:var(--gold); }
+
+  .agree-box { background:rgba(255,255,255,0.04); border:1px solid var(--border2); border-radius:14px; }
+  .hint { color:var(--muted); }
 </style>
 </head>
 <body>
