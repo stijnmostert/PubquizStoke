@@ -243,14 +243,19 @@ window.joinQuiz = function() {
 
 let isKicked = false;
 
+let hasJoined = false;
+
 function listenKick() {
   onValue(ref(db, `rooms/${ROOM}/players/${playerId}`), snap => {
     const me = snap.val();
-    // gekickt-vlag gezet door quizmaster
-    if (me && me.kicked) {
-      isKicked = true;
-      showKicked();
+    if (me) {
+      hasJoined = true;
+      // gekickt-vlag gezet door quizmaster
+      if (me.kicked) { isKicked = true; showKicked(); }
+      return;
     }
+    // record verdwenen ná het inloggen (bijv. reset) → terug naar inlogscherm
+    if (hasJoined) { location.reload(); }
   });
 }
 
