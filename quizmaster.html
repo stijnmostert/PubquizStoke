@@ -219,7 +219,16 @@
   #app, #setup-screen { position:relative; z-index:1; }
   #app { animation: appin .5s ease both; }
   @keyframes appin { from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;} }
-  .container { max-width: 980px; }
+  .container { max-width: 1320px; }
+
+  /* 3-koloms indeling */
+  .stage { display:grid; grid-template-columns: 250px 1fr 290px; gap:1.5rem; align-items:start; }
+  .col-center { display:flex; flex-direction:column; }
+  .col-left .panel, .col-right .panel { position:sticky; top:1.5rem; }
+  @media(max-width:1080px){
+    .stage { grid-template-columns:1fr; }
+    .col-left .panel, .col-right .panel { position:static; }
+  }
 
   /* Setup */
   .logo { font-family:var(--font-display); font-weight:800; font-size:58px; letter-spacing:-0.02em; }
@@ -359,54 +368,61 @@
     <!-- Wegswipe-waarschuwingen -->
     <div id="away-warnings" style="display:none;"></div>
 
-    <!-- Players online -->
-    <div class="players-section panel" style="margin-bottom:1.5rem;">
-      <div class="panel-head"><span class="panel-title">Spelers online</span></div>
-      <div class="panel-body" style="padding:12px 18px;">
-        <div id="players-list"><span style="font-size:13px;color:var(--muted);">Wachten op spelers...</span></div>
-      </div>
-    </div>
-
-    <!-- Ronde categorieën -->
-    <div class="round-tabs-bar" id="round-tabs"></div>
-
-    <!-- Actieve vraag groot bovenaan -->
-    <div class="panel" style="margin-bottom:1.5rem;">
-      <div class="panel-head"><span class="panel-title" id="active-q-roundlabel">&nbsp;</span></div>
-      <div class="panel-body">
-        <div class="active-q-box big" id="active-q-box">
-          <div class="active-q-text" id="active-q-text">Zijn jullie er een beetje klaar voor of moeten we nog even wachten?!?! 😄</div>
-          <div class="active-q-answer" id="active-q-answer"></div>
-        </div>
-        <div class="btn-row">
-          <button class="btn-sm" id="prev-q-btn" onclick="goPrev()">Vorige vraag</button>
-          <button class="btn-sm" id="show-answer-btn" onclick="toggleAnswer()">Toon antwoord</button>
-          <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag</button>
-          <button class="btn-sm gold" id="results-btn" onclick="showResults()" style="display:none;">🏆 Uitslag</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Antwoorden + scorebord naast elkaar -->
-    <div class="main-layout">
-      <!-- Antwoorden -->
-      <div class="panel">
-        <div class="panel-head"><span class="panel-title">Antwoorden van spelers</span></div>
-        <div class="panel-body">
-          <div id="answers-list"><div class="no-answers">Nog geen antwoorden</div></div>
+    <!-- 3-koloms indeling: spelers | midden | scorebord -->
+    <div class="stage">
+      <!-- LINKS: spelers online -->
+      <div class="col-left">
+        <div class="players-section panel">
+          <div class="panel-head"><span class="panel-title">Spelers online</span></div>
+          <div class="panel-body" style="padding:12px 18px;">
+            <div id="players-list"><span style="font-size:13px;color:var(--muted);">Wachten op spelers...</span></div>
+          </div>
         </div>
       </div>
 
-      <!-- Scorebord -->
-      <div class="panel score-panel">
-        <div class="panel-head">
-          <span class="panel-title">Scorebord</span>
-          <button class="btn-sm gold" id="toon-sb-btn" onclick="broadcastScoreboard()" style="padding:4px 10px;font-size:11px;">📺 Toon</button>
+      <!-- MIDDEN: ronde-iconen + vraag + antwoorden -->
+      <div class="col-center">
+        <!-- Ronde categorieën -->
+        <div class="round-tabs-bar" id="round-tabs"></div>
+
+        <!-- Actieve vraag groot bovenaan -->
+        <div class="panel" style="margin-bottom:1.5rem;">
+          <div class="panel-head"><span class="panel-title" id="active-q-roundlabel">&nbsp;</span></div>
+          <div class="panel-body">
+            <div class="active-q-box big" id="active-q-box">
+              <div class="active-q-text" id="active-q-text">Zijn jullie er een beetje klaar voor of moeten we nog even wachten?!?! 😄</div>
+              <div class="active-q-answer" id="active-q-answer"></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn-sm" id="prev-q-btn" onclick="goPrev()">Vorige vraag</button>
+              <button class="btn-sm" id="show-answer-btn" onclick="toggleAnswer()">Toon antwoord</button>
+              <button class="btn-sm green" id="next-q-btn" onclick="markDoneAndNext()">Volgende vraag</button>
+              <button class="btn-sm gold" id="results-btn" onclick="showResults()" style="display:none;">🏆 Uitslag</button>
+            </div>
+          </div>
         </div>
-        <div class="panel-body">
-          <div id="score-hidden-note" class="empty-state">Ranking verborgen<br>Klik op 📺 Toon</div>
-          <div class="score-list" id="score-list" style="display:none;">
-            <div class="empty-state">Wachten op spelers...</div>
+
+        <!-- Antwoorden (even breed als de vraag) -->
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title">Antwoorden van spelers</span></div>
+          <div class="panel-body">
+            <div id="answers-list"><div class="no-answers">Nog geen antwoorden</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECHTS: scorebord -->
+      <div class="col-right">
+        <div class="panel score-panel">
+          <div class="panel-head">
+            <span class="panel-title">Scorebord</span>
+            <button class="btn-sm gold" id="toon-sb-btn" onclick="broadcastScoreboard()" style="padding:4px 10px;font-size:11px;">📺 Toon</button>
+          </div>
+          <div class="panel-body">
+            <div id="score-hidden-note" class="empty-state">Ranking verborgen<br>Klik op 📺 Toon</div>
+            <div class="score-list" id="score-list" style="display:none;">
+              <div class="empty-state">Wachten op spelers...</div>
+            </div>
           </div>
         </div>
       </div>
