@@ -118,6 +118,13 @@
     <div class="waiting-sub">Even bijkomen! De quiz gaat zo verder</div>
   </div>
 
+  <!-- NIEUWE CATEGORIE -->
+  <div id="round-intro-screen" style="display:none; text-align:center;">
+    <div class="waiting-icon" id="round-intro-icon">🎯</div>
+    <div class="waiting-sub" style="margin-bottom:6px;">Nieuwe categorie</div>
+    <div class="waiting-title" id="round-intro-title"></div>
+  </div>
+
   <!-- GEKICKT -->
   <div id="kicked-screen" style="display:none;">
     <div class="waiting-icon">🚫</div>
@@ -207,7 +214,7 @@ window.joinQuiz = function() {
   }
 
   // wachtwoordcontrole
-  if (password !== 'quizcity123!') {
+  if (password !== 'stijn123') {
     document.getElementById('login-error').style.display = 'block';
     return;
   }
@@ -248,7 +255,7 @@ function listenKick() {
 }
 
 function showKicked() {
-  ['join-screen','waiting-screen','question-screen','scoreboard-screen','pause-screen','agree-screen']
+  ['join-screen','waiting-screen','question-screen','scoreboard-screen','pause-screen','agree-screen','round-intro-screen']
     .forEach(id => { const e = document.getElementById(id); if (e) e.style.display = 'none'; });
   const k = document.getElementById('kicked-screen');
   if (k) k.style.display = 'block';
@@ -345,10 +352,23 @@ function listenState() {
       if (imgEl && q.blur) {
         imgEl.classList.toggle('blurred', !state.showAnswer);
       }
+    } else if (state.roundIntro) {
+      currentQKey = null;
+      showRoundIntro(state.roundIntro);
     } else {
       showWaiting();
     }
   });
+}
+
+function showRoundIntro(intro) {
+  document.getElementById('waiting-screen').style.display = 'none';
+  document.getElementById('question-screen').style.display = 'none';
+  document.getElementById('scoreboard-screen').style.display = 'none';
+  document.getElementById('pause-screen').style.display = 'none';
+  document.getElementById('round-intro-screen').style.display = 'block';
+  document.getElementById('round-intro-icon').textContent = intro.emoji || '🎯';
+  document.getElementById('round-intro-title').textContent = intro.title || '';
 }
 
 function showAgree() {
@@ -356,6 +376,7 @@ function showAgree() {
   document.getElementById('question-screen').style.display = 'none';
   document.getElementById('scoreboard-screen').style.display = 'none';
   document.getElementById('pause-screen').style.display = 'none';
+  document.getElementById('round-intro-screen').style.display = 'none';
   document.getElementById('agree-screen').style.display = 'block';
 }
 
@@ -374,6 +395,7 @@ function showWaiting() {
   document.getElementById('question-screen').style.display = 'none';
   document.getElementById('scoreboard-screen').style.display = 'none';
   document.getElementById('pause-screen').style.display = 'none';
+  document.getElementById('round-intro-screen').style.display = 'none';
 }
 
 function showPause() {
@@ -381,6 +403,7 @@ function showPause() {
   document.getElementById('question-screen').style.display = 'none';
   document.getElementById('scoreboard-screen').style.display = 'none';
   document.getElementById('pause-screen').style.display = 'block';
+  document.getElementById('round-intro-screen').style.display = 'none';
 }
 
 function showQuestion(q) {
@@ -388,6 +411,7 @@ function showQuestion(q) {
   document.getElementById('waiting-screen').style.display = 'none';
   document.getElementById('scoreboard-screen').style.display = 'none';
   document.getElementById('pause-screen').style.display = 'none';
+  document.getElementById('round-intro-screen').style.display = 'none';
   document.getElementById('question-screen').style.display = 'block';
   document.getElementById('q-label').textContent = `Vraag ${q.qi + 1}/${q.total || 5} van de ${q.title || ''}`;
 
@@ -471,6 +495,7 @@ function showScoreboard() {
     document.getElementById('waiting-screen').style.display = 'none';
     document.getElementById('question-screen').style.display = 'none';
     document.getElementById('pause-screen').style.display = 'none';
+    document.getElementById('round-intro-screen').style.display = 'none';
     document.getElementById('scoreboard-screen').style.display = 'block';
   }, { onlyOnce: true });
 }
