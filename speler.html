@@ -268,6 +268,7 @@ const FIREBASE_CONFIG = {
 let db, ROOM, playerId, playerName;
 let currentQKey = null;
 let currentQ = null;
+let answerShown = false;
 let hasSubmitted = false;
 let joinTime = 0;
 let latestRulesAt = 0;
@@ -386,17 +387,21 @@ function listenFeedback() {
     const result = snap.val();
     const el = document.getElementById('feedback-result');
     const rankEl = document.getElementById('feedback-rank');
+    const redoBtn = document.getElementById('redo-btn');
     if (!el) return;
     if (rankEl) rankEl.textContent = '';
     if (result === 'correct') {
       el.textContent = '✅';
       el.classList.add('show');
+      if (redoBtn) redoBtn.style.display = 'none';
     } else if (result === 'wrong') {
       el.textContent = '❌';
       el.classList.add('show');
+      if (redoBtn) redoBtn.style.display = 'none';
     } else {
       el.textContent = '';
       el.classList.remove('show');
+      if (redoBtn) redoBtn.style.display = answerShown ? 'none' : '';
     }
   });
 }
@@ -439,8 +444,9 @@ function listenState() {
         imgEl.classList.toggle('blurred', !state.showAnswer);
       }
       // als het antwoord getoond is, mag je je antwoord niet meer wijzigen
+      answerShown = !!state.showAnswer;
       const redoBtn = document.getElementById('redo-btn');
-      if (redoBtn) redoBtn.style.display = state.showAnswer ? 'none' : '';
+      if (redoBtn && state.showAnswer) redoBtn.style.display = 'none';
     } else if (state.roundIntro) {
       currentQKey = null;
       showRoundIntro(state.roundIntro);
