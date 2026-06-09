@@ -297,6 +297,8 @@
   #away-cross .cross-sub { font-size:18px; color:#ffd2d2; margin-top:6px; }
   @keyframes crosspulse { from{background:rgba(20,5,5,0.45);} to{background:rgba(40,8,8,0.7);} }
   .eye-btn, .award-btn, .wrong-btn { border-radius:9px; border:1px solid var(--border); font-family:var(--font-body); }
+  .undo-btn { border-radius:9px; border:1px solid var(--border); background:rgba(255,255,255,0.03); color:var(--cream); cursor:pointer; font-size:13px; padding:6px 10px; }
+  .undo-btn:hover { border-color:var(--gold); background:rgba(243,182,92,0.1); }
   .award-btn.awarded { background:rgba(115,226,171,0.15); border-color:var(--green); color:var(--green); }
   .wrong-btn.marked { background:rgba(255,143,143,0.15); border-color:var(--red); color:var(--red); }
 
@@ -974,6 +976,7 @@ function renderAnswers() {
         <button class="eye-btn" onclick="toggleAnswerVisible('${playerId}')" title="${visible ? 'Verberg' : 'Toon'} antwoord">${visible ? '🙈' : '👁️'}</button>
         <button class="award-btn ${correct ? 'awarded' : ''}" onclick="markCorrect('${playerId}')">${correct ? '✓ Punt' : '+ Punt'}</button>
         <button class="wrong-btn ${wrong ? 'marked' : ''}" onclick="markWrong('${playerId}')">${wrong ? '✗ Fout' : 'Fout'}</button>
+        <button class="undo-btn" onclick="resetGrade('${playerId}')" title="Beoordeling ongedaan maken">↩️</button>
       </div>`;
     }).join('');
   }
@@ -1043,6 +1046,18 @@ window.markWrong = function(playerId) {
     wrongAnswers.add(playerId);
     set(ref(db, `rooms/${ROOM}/feedback/${playerId}`), 'wrong');
   }
+  renderAnswers();
+};
+
+window.resetGrade = function(playerId) {
+  // beoordeling helemaal terugzetten (punt eraf indien gegeven, fout weg, feedback weg)
+  if (awardedAnswers.has(playerId)) {
+    awardedAnswers.delete(playerId);
+    const cur = players[playerId]?.score || 0;
+    update(ref(db, `rooms/${ROOM}/players/${playerId}`), { score: Math.max(0, cur - 1) });
+  }
+  wrongAnswers.delete(playerId);
+  set(ref(db, `rooms/${ROOM}/feedback/${playerId}`), null);
   renderAnswers();
 };
 
