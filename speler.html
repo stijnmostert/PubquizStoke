@@ -438,6 +438,9 @@ function listenState() {
       if (imgEl && q.blur) {
         imgEl.classList.toggle('blurred', !state.showAnswer);
       }
+      // als het antwoord getoond is, mag je je antwoord niet meer wijzigen
+      const redoBtn = document.getElementById('redo-btn');
+      if (redoBtn) redoBtn.style.display = state.showAnswer ? 'none' : '';
     } else if (state.roundIntro) {
       currentQKey = null;
       showRoundIntro(state.roundIntro);
