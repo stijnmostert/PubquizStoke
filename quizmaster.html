@@ -286,8 +286,14 @@
   .btn-sm:disabled { opacity:0.3; }
 
   /* Antwoorden */
-  .answer-item { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:10px 14px; transition: opacity .2s; }
+  .answer-item { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:10px 14px; transition: opacity .2s; display:flex; flex-direction:column; gap:8px; align-items:stretch; }
   .answer-item.graded { opacity:0.5; }
+  #answers-list { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .answer-top { display:flex; align-items:center; gap:8px; }
+  .answer-top .answer-text { flex:1; min-width:0; }
+  .answer-actions { display:flex; gap:6px; }
+  .answer-actions .award-btn, .answer-actions .wrong-btn { flex:1; }
+  @media(max-width:760px){ #answers-list { grid-template-columns:1fr; } }
 
   /* Groot kruis als iemand weg is */
   #away-cross { display:none; position:fixed; inset:0; z-index:200; align-items:center; justify-content:center; flex-direction:column; background:rgba(20,5,5,0.55); backdrop-filter:blur(2px); pointer-events:none; }
@@ -306,6 +312,8 @@
   .score-item { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; }
   .score-item.top { border-color:var(--border2); background:rgba(243,182,92,0.08); }
   .score-pts { font-family:var(--font-display); color:var(--gold); }
+  .score-list { transition: filter .3s ease; }
+  .score-list.blurred { filter: blur(8px); }
   .score-bar { background:rgba(0,0,0,0.35); }
   .score-bar-fill { background:linear-gradient(90deg,var(--gold),var(--gold2)); }
 
@@ -430,8 +438,7 @@
             <button class="btn-sm gold" id="toon-sb-btn" onclick="broadcastScoreboard()" style="padding:4px 10px;font-size:11px;">📺 Toon</button>
           </div>
           <div class="panel-body">
-            <div id="score-hidden-note" class="empty-state">Ranking verborgen<br>Klik op 📺 Toon</div>
-            <div class="score-list" id="score-list" style="display:none;">
+            <div class="score-list blurred" id="score-list" onclick="broadcastScoreboard()" style="cursor:pointer;">
               <div class="empty-state">Wachten op spelers...</div>
             </div>
           </div>
@@ -450,7 +457,7 @@
     </div>
     <div class="rules-body" id="rules-body">
       <p>🍻 Als je een vraag fout hebt moet je 3 slokken nemen</p>
-      <p>🍻 Als 5 van de 9 de vraag goed hebben neemt de quizmaster (Stinna) 3 slokken</p>
+      <p>🍻 Als 7 van de 10 de vraag goed hebben neemt de quizmaster (Stinna) 3 slokken</p>
       <p>🍻 Je mag niet naar een ander tabblad of een andere app, anders een adtje</p>
       <p>🍻 Zeuren over een antwoord is 3 slokken</p>
       <p>🍻 Tijdens het spel is er een pauze</p>
@@ -634,6 +641,8 @@ function listenPlayers() {
 }
 
 let awayPlaying = false;
+let awayTimer = null;
+let awayActive = false;
 
 function renderAwayWarnings() {
   // de oude kleine kaart bovenin niet meer gebruiken
@@ -651,21 +660,25 @@ function renderAwayWarnings() {
 
   if (away.length) {
     document.getElementById('away-cross-names').textContent = away.join(', ');
-    cross.classList.add('show');
-    // geluid afspelen (zolang iemand weg is)
-    if (audio && !awayPlaying) {
-      awayPlaying = true;
-      audio.loop = true;
-      audio.currentTime = 0;
-      audio.play().catch(() => {});
+    // alleen een nieuwe melding starten als er nog geen actief is
+    if (!awayActive) {
+      awayActive = true;
+      cross.classList.add('show');
+      if (audio) { audio.loop = true; audio.currentTime = 0; audio.play().catch(() => {}); awayPlaying = true; }
+      // na 8 seconden weer verbergen
+      clearTimeout(awayTimer);
+      awayTimer = setTimeout(() => {
+        cross.classList.remove('show');
+        if (audio) { audio.pause(); audio.currentTime = 0; }
+        awayPlaying = false;
+      }, 8000);
     }
   } else {
+    // iedereen terug → meteen verbergen en klaarzetten voor een volgende keer
+    awayActive = false;
+    clearTimeout(awayTimer);
     cross.classList.remove('show');
-    if (audio && awayPlaying) {
-      awayPlaying = false;
-      audio.pause();
-      audio.currentTime = 0;
-    }
+    if (audio && awayPlaying) { audio.pause(); audio.currentTime = 0; awayPlaying = false; }
   }
 }
 
@@ -971,12 +984,16 @@ function renderAnswers() {
         ? `<span class="answer-text">"${data.answer}"</span>`
         : `<span class="answer-text hidden-answer">••••••••</span>`;
       return `<div class="answer-item${correct || wrong ? ' graded' : ''}">
-        <span class="player-name">${name}</span>
-        ${answerHtml}
-        <button class="eye-btn" onclick="toggleAnswerVisible('${playerId}')" title="${visible ? 'Verberg' : 'Toon'} antwoord">${visible ? '🙈' : '👁️'}</button>
-        <button class="award-btn ${correct ? 'awarded' : ''}" onclick="markCorrect('${playerId}')">${correct ? '✓ Punt' : '+ Punt'}</button>
-        <button class="wrong-btn ${wrong ? 'marked' : ''}" onclick="markWrong('${playerId}')">${wrong ? '✗ Fout' : 'Fout'}</button>
-        <button class="undo-btn" onclick="resetGrade('${playerId}')" title="Beoordeling ongedaan maken">↩️</button>
+        <div class="answer-top">
+          <span class="player-name">${name}</span>
+          ${answerHtml}
+          <button class="eye-btn" onclick="toggleAnswerVisible('${playerId}')" title="${visible ? 'Verberg' : 'Toon'} antwoord">${visible ? '🙈' : '👁️'}</button>
+        </div>
+        <div class="answer-actions">
+          <button class="award-btn ${correct ? 'awarded' : ''}" onclick="markCorrect('${playerId}')">${correct ? '✓ Punt' : '+ Punt'}</button>
+          <button class="wrong-btn ${wrong ? 'marked' : ''}" onclick="markWrong('${playerId}')">${wrong ? '✗ Fout' : 'Fout'}</button>
+          <button class="undo-btn" onclick="resetGrade('${playerId}')" title="Beoordeling ongedaan maken">↩️</button>
+        </div>
       </div>`;
     }).join('');
   }
@@ -1097,25 +1114,18 @@ function renderScoreboard() {
 let scoreboardRevealed = false;
 
 window.broadcastScoreboard = function() {
-  if (scoreboardRevealed) { hideScoreboard(); return; }
-  scoreboardRevealed = true;
-  renderScoreboard();
-  document.getElementById('scoreboard-overlay').classList.add('show');
-  document.getElementById('score-list').style.display = '';
-  document.getElementById('score-hidden-note').style.display = 'none';
+  scoreboardRevealed = !scoreboardRevealed;
+  document.getElementById('score-list').classList.toggle('blurred', !scoreboardRevealed);
   const btn = document.getElementById('toon-sb-btn');
-  if (btn) btn.textContent = '🙈 Verberg';
-  update(ref(db, `rooms/${ROOM}/state`), { showScoreboard: true });
+  if (btn) btn.textContent = scoreboardRevealed ? '🙈 Verberg' : '📺 Toon';
 };
 
 window.hideScoreboard = function() {
   scoreboardRevealed = false;
-  document.getElementById('scoreboard-overlay').classList.remove('show');
-  document.getElementById('score-list').style.display = 'none';
-  document.getElementById('score-hidden-note').style.display = '';
+  document.getElementById('score-list').classList.add('blurred');
   const btn = document.getElementById('toon-sb-btn');
   if (btn) btn.textContent = '📺 Toon';
-  update(ref(db, `rooms/${ROOM}/state`), { showScoreboard: false });
+  document.getElementById('scoreboard-overlay').classList.remove('show');
 };
 
 window.openRules = function() {
