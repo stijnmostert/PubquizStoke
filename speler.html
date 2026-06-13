@@ -335,6 +335,11 @@ function attachListeners() {
 
 window.logout = function() {
   if (!confirm('Weet je zeker dat je wilt uitloggen?')) return;
+  loggedOut = true;
+  // presence-detectie stoppen zodat het record niet opnieuw wordt aangemaakt
+  document.removeEventListener('visibilitychange', reportPresence);
+  window.removeEventListener('blur', reportPresence);
+  window.removeEventListener('focus', reportPresence);
   try { localStorage.removeItem('pq_session'); } catch(e) {}
   const done = () => location.reload();
   if (playerId && ROOM) {
@@ -365,6 +370,7 @@ function tryRestoreSession() {
 tryRestoreSession();
 
 let isKicked = false;
+let loggedOut = false;
 
 let hasJoined = false;
 
@@ -421,7 +427,7 @@ function showMyRank() {
 }
 
 function reportPresence() {
-  if (!db || !ROOM || !playerId) return;
+  if (!db || !ROOM || !playerId || loggedOut || isKicked) return;
   const away = document.hidden;
   update(ref(db, `rooms/${ROOM}/players/${playerId}`), { away });
 }
