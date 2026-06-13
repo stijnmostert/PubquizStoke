@@ -162,6 +162,8 @@
 
   .agree-box { background:rgba(255,255,255,0.04); border:1px solid var(--border2); border-radius:14px; }
   .hint { color:var(--muted); }
+  .btn-logout { display:block; margin:18px auto 0; background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:10px; padding:8px 18px; font-family:var(--font-body); font-size:13px; cursor:pointer; }
+  .btn-logout:hover { border-color:var(--red); color:var(--red); }
 </style>
 </head>
 <body>
@@ -248,6 +250,7 @@
   </div>
 
   <div class="room-info" id="room-info" style="display:none;">Kamer: <b id="room-show"></b></div>
+  <button id="logout-btn" class="btn-logout" onclick="logout()" style="display:none;">Uitloggen</button>
 </div>
 
 <script type="module">
@@ -326,7 +329,18 @@ function attachListeners() {
   document.addEventListener('visibilitychange', reportPresence);
   window.addEventListener('blur', reportPresence);
   window.addEventListener('focus', reportPresence);
+  const lo = document.getElementById('logout-btn');
+  if (lo) lo.style.display = '';
 }
+
+window.logout = function() {
+  if (!confirm('Weet je zeker dat je wilt uitloggen?')) return;
+  try { localStorage.removeItem('pq_session'); } catch(e) {}
+  const done = () => location.reload();
+  if (playerId && ROOM) {
+    remove(ref(db, `rooms/${ROOM}/players/${playerId}`)).then(done).catch(done);
+  } else { done(); }
+};
 
 // herstel een bestaande sessie na een (per ongeluk) refresh
 function tryRestoreSession() {
