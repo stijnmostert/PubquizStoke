@@ -252,7 +252,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, set, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 // ⚠️ VERVANG DEZE WAARDEN MET JOUW FIREBASE GEGEVENS
 const FIREBASE_CONFIG = {
@@ -307,21 +307,48 @@ window.joinQuiz = function() {
   joinTime = Date.now();
 
   set(ref(db, `rooms/${ROOM}/players/${playerId}`), { name: playerName, score: 0, joinedAt: Date.now() });
+  // sessie onthouden zodat een per ongeluk refresh je niet uitlogt
+  try { localStorage.setItem('pq_session', JSON.stringify({ playerId, playerName, room: ROOM })); } catch(e) {}
 
   document.getElementById('join-screen').style.display = 'none';
   document.getElementById('waiting-screen').style.display = 'block';
   document.getElementById('name-badge').textContent = playerName;
 
+  attachListeners();
+};
+
+function attachListeners() {
   listenState();
   listenFeedback();
   listenPlayersForRank();
   listenKick();
-
   // detecteer wegswipen / ander tabblad / app naar achtergrond
   document.addEventListener('visibilitychange', reportPresence);
   window.addEventListener('blur', reportPresence);
   window.addEventListener('focus', reportPresence);
-};
+}
+
+// herstel een bestaande sessie na een (per ongeluk) refresh
+function tryRestoreSession() {
+  let s;
+  try { s = JSON.parse(localStorage.getItem('pq_session')); } catch(e) { s = null; }
+  if (!s || !s.playerId || !s.room) return;
+  get(ref(db, `rooms/${s.room}/players/${s.playerId}`)).then(snap => {
+    if (snap.exists()) {
+      // record bestaat nog → gewoon weer meedoen
+      playerId = s.playerId; playerName = s.playerName; ROOM = s.room;
+      joinTime = Date.now();
+      document.getElementById('join-screen').style.display = 'none';
+      document.getElementById('waiting-screen').style.display = 'block';
+      document.getElementById('name-badge').textContent = playerName;
+      attachListeners();
+    } else {
+      // record weg (reset/kick) → sessie wissen, inlogscherm tonen
+      try { localStorage.removeItem('pq_session'); } catch(e) {}
+    }
+  }).catch(() => {});
+}
+tryRestoreSession();
 
 let isKicked = false;
 
@@ -336,8 +363,11 @@ function listenKick() {
       if (me.kicked) { isKicked = true; showKicked(); }
       return;
     }
-    // record verdwenen ná het inloggen (bijv. reset) → terug naar inlogscherm
-    if (hasJoined) { location.reload(); }
+    // record verdwenen ná het inloggen (bijv. reset) → sessie wissen en terug naar inlogscherm
+    if (hasJoined) {
+      try { localStorage.removeItem('pq_session'); } catch(e) {}
+      location.reload();
+    }
   });
 }
 
@@ -571,6 +601,9 @@ function showQuestion(q) {
   document.getElementById('feedback-result').classList.remove('show');
   document.getElementById('feedback-result').textContent = '';
   document.getElementById('feedback-rank').textContent = '';
+  const redoBtn = document.getElementById('redo-btn');
+  if (redoBtn) redoBtn.style.display = '';
+  answerShown = false;
 }
 
 function showScoreboard() {
