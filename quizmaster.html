@@ -288,12 +288,12 @@
   /* Antwoorden */
   .answer-item { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:10px 14px; transition: opacity .2s; display:flex; flex-direction:column; gap:8px; align-items:stretch; }
   .answer-item.graded { opacity:0.5; }
-  #answers-list { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  #answers-list { display:grid; grid-template-columns:repeat(auto-fill, minmax(195px, 1fr)); gap:10px; }
   .answer-top { display:flex; align-items:center; gap:8px; }
-  .answer-top .answer-text { flex:1; min-width:0; }
+  .answer-top .answer-text { flex:1; min-width:0; word-break:break-word; }
   .answer-actions { display:flex; gap:6px; }
   .answer-actions .award-btn, .answer-actions .wrong-btn { flex:1; }
-  @media(max-width:760px){ #answers-list { grid-template-columns:1fr; } }
+  @media(max-width:480px){ #answers-list { grid-template-columns:1fr; } }
 
   /* Groot kruis als iemand weg is */
   #away-cross { display:none; position:fixed; inset:0; z-index:200; align-items:center; justify-content:center; flex-direction:column; background:rgba(20,5,5,0.55); backdrop-filter:blur(2px); pointer-events:none; }
