@@ -630,6 +630,13 @@ window.startApp = function() {
 function listenPlayers() {
   onValue(ref(db, `rooms/${ROOM}/players`), snap => {
     players = snap.val() || {};
+    // negeer half-aangemaakte records zonder naam (en ruim ze op)
+    Object.keys(players).forEach(k => {
+      if (!players[k] || !players[k].name) {
+        remove(ref(db, `rooms/${ROOM}/players/${k}`));
+        delete players[k];
+      }
+    });
     scores = {};
     Object.entries(players).forEach(([k, v]) => { scores[k] = v.score || 0; });
     renderPlayers();
